@@ -32,13 +32,13 @@
 
 The lightest feature-rich **C++** single-header testing framework for unit tests and TDD
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 Inspired by ***unittest {}*** from **D** and **Python**'s **docstrings**/**doctests**
 
 **Mantra**: Tests can be considered a form of documentation and should be able to reside near the code which they test
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 A complete example with a self-registering test that compiles to an executable
 
@@ -56,7 +56,7 @@ TEST_CASE("testing the factorial function") {
 }
 ```
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 and the output of that executable
 
@@ -79,7 +79,7 @@ with expansion:
 
 exit code != 0 because an assertion failed
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 Interface and functionality modeled mainly after [Catch](https://github.com/philsquared/Catch)
 
@@ -89,7 +89,7 @@ Some ideas taken (or added to the roadmap) from [Boost.Test](http://www.boost.or
 
 Distributed as a single header for simple integration
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 ### what makes it different
 
@@ -98,7 +98,7 @@ In 2 words: light and unintrusive
 - ultra light on compile times for including the header
 - can remove everything testing-related from the binary
 - doesn't pollute the global namespace (or uses a prefix)
-- all macros are (can be) prefixed
+- all macros are (or can be) prefixed
 - doesn't drag any headers with it (except where implemented)
 - 0 warnings even on the most aggressive levels
 - very portable and well tested C++98
@@ -110,7 +110,7 @@ In 2 words: light and unintrusive
 
 Unnoticeable even if included in every source file of your project
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 #### very reliable - per commit tested
 
@@ -130,7 +130,7 @@ a total of 220+ different configurations are built and tested
 
 leveraging the free **travis** and **appveyor** CI services which are integrated with github
 
-</section><section data-markdown><!--//=========================================================================================--> <!-- //========================================================================================= -->
+</section><section data-markdown><!--//===============================================================================--> <!-- //========================================================================================= -->
 
 ### all this makes writing tests in the production code feasible! - leading to:
 
@@ -143,7 +143,7 @@ leveraging the free **travis** and **appveyor** CI services which are integrated
 
 The library can be used like any other even if you don't like the idea of mixing production code and tests
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
 ### most notable features other than being light, transparent and stable
 
@@ -160,15 +160,257 @@ The library can be used like any other even if you don't like the idea of mixing
 - can write tests in headers and still be registered only once
 - execution of binaries with any compiler on any OS is the same
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
-</section><section data-markdown><!--//=========================================================================================-->
+# let's get into details
 
-</section><section data-markdown><!--//=========================================================================================-->
+</section><section data-markdown><!--//===============================================================================-->
 
-roadmap
+### single header with 2 parts
 
-</section><section data-markdown><!--//=========================================================================================-->
+```c++
+#ifndef GUARD_FWD
+// fwd stuff
+#define GUARD_FWD
+#endif // GUARD_FWD
+
+// ================================================
+
+#if defined(DOCTEST_CONFIG_IMPLEMENT)
+#ifndef GUARD_IMPL
+#define GUARD_IMPL
+
+#include &lt;cstdio&gt;
+// test runner stuff...
+
+#endif // GUARD_IMPL
+#endif // DOCTEST_CONFIG_IMPLEMENT
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### unique anonymous variables
+
+```c++
+#define DOCTEST_CONCAT_IMPL(s1, s2) s1##s2
+#define DOCTEST_CONCAT(s1, s2) DOCTEST_CONCAT_IMPL(s1, s2)
+#ifdef __COUNTER__ // not standard and may be missing for some compilers
+#define DOCTEST_ANONYMOUS(x) DOCTEST_CONCAT(x, __COUNTER__)
+#else // __COUNTER__
+#define DOCTEST_ANONYMOUS(x) DOCTEST_CONCAT(x, __LINE__)
+#endif // __COUNTER__
+
+int DOCTEST_ANONYMOUS(DOCTEST_ANON_VAR_); // int DOCTEST_ANON_VAR_5;
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### how the test cases get auto registered
+
+```c++
+TEST_CASE("testing stuff") {
+    // asserts
+}
+```
+
+gets expanded to
+
+```c++
+static void DOCTEST_ANON_FUNC_1324();
+static int DOCTEST_ANON_VAR_1325 = doctest::detail::regTest(
+    DOCTEST_ANON_FUNC_1324, __FILE__, __LINE__, "testing stuff");
+void DOCTEST_ANON_FUNC_1324() {
+    // asserts
+}
+```
+
+static to not clash during linking with symbols with the same names from another translation unit
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### how the test cases get auto registered
+
+this resides in the test runner
+
+```c++
+std::set&lt;Test&gt;& getTestRegistry() { // return by reference
+    static std::set&lt;Test&gt; data;     // important to be wrapped in a function
+    return data;
+}
+
+typedef void (*funcType)(void);
+
+int regTest(funcType f, unsigned line, const char* file, const char* name) {
+    getTestRegistry().insert(Test(currentTestSuite(), name, f, file, line));
+    return 0;
+}
+```
+
+but the TEST_CASE macro produces warnings with clang!
+
+-Wglobal-constructors
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### lets talk about warnings
+
+- -Weverything for Clang
+- /W4 for MSVC (/Wall is madness - even std::vector produces thousands of warnings)
+- -Wall -Wextra -pedantic for GCC (and over 50 other unique flags not covered by these! took a lot of time to find them)
+
+- the full set of GCC warnings https://github.com/Barro/compiler-warnings
+
+</section><section style="font-size:25px"><!--//===============================================================================-->
+
+<h3>the additional GCC flags</h3>
+
+-ansi -fstrict-aliasing -fstack-protector-all -funsafe-loop-optimizations -fdiagnostics-show-option -Wconversion -Wno-missing-field-initializers -Wold-style-cast -Wfloat-equal -Wlogical-op -Wundef -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wwrite-strings -Wpointer-arith -Wcast-qual -Wformat=2 -Wswitch-default -Wmissing-include-dirs -Wcast-align -Wformat-nonliteral -Wparentheses -Winit-self -Wuninitialized -Wswitch-enum -Wno-endif-labels -Wunused-function -Wnon-virtual-dtor -Wno-pmf-conversions -Wctor-dtor-privacy -Wsign-promo -Wsign-conversion -Wdisabled-optimization -Weffc++ -Winline -Winvalid-pch -Wstack-protector -Wunsafe-loop-optimizations -Wmissing-declarations -Woverloaded-virtual -Wstrict-null-sentinel -Wnoexcept -Wdouble-promotion -Wtrampolines -Wzero-as-null-pointer-constant -Wuseless-cast -Wvector-operation-performance -Wsized-deallocation -Wshift-overflow=2 -Wnull-dereference -Wduplicated-cond -Wmisleading-indentation -Wshift-negative-value
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### silencing them in my header
+
+```c++
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
+#endif // __clang__
+
+// ... header stuff
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif // __clang__
+```
+
+every (decent) compiler can do this
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### silencing them in macros used by the user
+
+```c++
+#ifdef __clang__
+#define DOCTEST_REGISTER_FUNCTION(f, name)                                  \
+    _Pragma("clang diagnostic push")                                        \
+    _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"")           \
+    static int DOCTEST_ANONYMOUS(DOCTEST_ANON_VAR_) =                       \
+                doctest::detail::regTest(f, __LINE__, __FILE__, name);      \
+    _Pragma("clang diagnostic pop")
+#endif // __clang__
+
+#define DOCTEST_CREATE_AND_REGISTER(f, name)                                \
+    static void f();                                                        \
+    DOCTEST_REGISTER_FUNCTION(f, name)                                      \
+    inline void f()
+
+#define DOCTEST_TEST_CASE(name)                                             \
+    DOCTEST_CREATE_AND_REGISTER(DOCTEST_ANONYMOUS(DOCTEST_ANON_FUNC_), name)
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### silencing them in macros used by the user
+
+but GCC also gives a warning - that the dummy int is not used
+
+so... _Pragma() to the rescue? :)
+
+</section><section data-markdown><!--//===============================================================================-->
+
+# NOOOOOT
+
+</section><section data-markdown><!--//===============================================================================-->
+
+_Pragma() in the C++ frontend of GCC (g++) isn't working in complex macros for quite some time (4+ years)
+
+- https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55578
+- https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69543
+
+and luckily I can solve the warning with
+
+__attribute__((unused))
+
+```c++
+#if defined(__GNUC__) && !defined(__clang__)
+#define DOCTEST_REGISTER_FUNCTION(f, name)                                  \
+    static int DOCTEST_ANONYMOUS(DOCTEST_ANON_VAR_) __attribute__((unused)) \
+        = doctest::detail::regTest(f, __LINE__, __FILE__, name);
+#endif // __GNUC__
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+so far I haven't been able to suppress only -Waggregate-return in the CHECK() marco but it is more than worthless in C++
+
+> It's a completely anachronistic warning, since its motivation was to support backwards compatibility with C compilers that did not allow returning structures. Those compilers are long dead and are no longer of practical concern.
+
+so I disable it at the begining of my header and leave it undisabled (don't tell anyone!)
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+went to great lengths to not make any compromises
+
+hit so many toolchain problems...
+
+personal favourites: -Winline -Weffc++ -Wstrict-overflow
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### roadmap
+
+- improved startup time - less alocations
+- a mechanism for translating user defined exceptions
+- crash handling: signals on UNIX (and SE on Windows)
+- support for tagging - separate from test case names
+- reporters - xml, jUnit/xUnit and user defined
+- convolution support for the assertion macros
+- time stuff - how much ms does a test take
+- add contextual info to asserts - with an INFO macro
+- running tests a few times
+- test execution in separate processes - UNIX fork()
+- detect floating point exceptions
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### more roadmap!
+
+- generators
+- matchers
+- customizing the colors in the console output
+- utf8?
+- wchar?
+- allocator for String class
+- MSTest integration (and also maybe with XCode)
+- and many many other small things!
+
+</section><section data-markdown><!--//===============================================================================-->
 
 And all this without having ever written or dealt with unit tests (still haven't)
 
@@ -176,7 +418,7 @@ And all this without having ever written or dealt with unit tests (still haven't
 
 This presentation was made possible **NO** thanks to ***Dota 2***
 
-That cancer tried it's best but I defeated it 2 days ago
+That cancer tried it's best but I defeated it 2 days ago (deleted)
 
 [http://onqtam.github.io/slides/doctest.html](http://onqtam.github.io/slides/doctest.html)
 
