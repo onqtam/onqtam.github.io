@@ -104,7 +104,7 @@ In 2 words: light and unintrusive
 - very portable and well tested C++98
 - the user can easily provide the ***main()*** entry point
 - can set options procedurally and not deal with argc/argv
-- doesn't leave warnings disabled after itself
+- command line options can be prefixed to not clash with user
 
 ------
 
@@ -150,7 +150,7 @@ The library can be used like any other even if you don't like the idea of mixing
 - only one core assertion macro for comparisons
 - automatically registered tests
 - subcases for shared setup/teardown between tests
-- assertion for dealing with exceptions
+- assertions for dealing with exceptions
 - floating point comparison support - see the Approx() helper
 - powerful mechanism for stringification of user types
 - powerful command line with lots of options
@@ -158,7 +158,7 @@ The library can be used like any other even if you don't like the idea of mixing
 - failures can break into the debugger on Windows and Mac
 - colored output in the console
 - can write tests in headers and still be registered only once
-- execution of binaries with any compiler on any OS is the same
+- range-based execution of tests
 
 </section><section data-markdown><!--//===============================================================================-->
 
@@ -170,8 +170,8 @@ The library can be used like any other even if you don't like the idea of mixing
 
 ```c++
 #ifndef GUARD_FWD
-// fwd stuff
 #define GUARD_FWD
+// fwd stuff
 #endif // GUARD_FWD
 
 // ================================================
@@ -205,7 +205,7 @@ int DOCTEST_ANONYMOUS(DOCTEST_ANON_VAR_); // int DOCTEST_ANON_VAR_5;
 
 </section><section data-markdown><!--//===============================================================================-->
 
-### how the test cases get auto registered
+### auto registration
 
 ```c++
 TEST_CASE("testing stuff") {
@@ -217,8 +217,8 @@ gets expanded to
 
 ```c++
 static void DOCTEST_ANON_FUNC_1324();
-static int DOCTEST_ANON_VAR_1325 = doctest::detail::regTest(
-    DOCTEST_ANON_FUNC_1324, __FILE__, __LINE__, "testing stuff");
+static int DOCTEST_ANON_VAR_1325 = regTest(
+    DOCTEST_ANON_FUNC_1324, "main.cpp", 56, "testing stuff");
 void DOCTEST_ANON_FUNC_1324() {
     // asserts
 }
@@ -228,7 +228,7 @@ static to not clash during linking with symbols with the same names from another
 
 </section><section data-markdown><!--//===============================================================================-->
 
-### how the test cases get auto registered
+### auto registration
 
 this resides in the test runner
 
@@ -240,7 +240,7 @@ std::set&lt;Test&gt;& getTestRegistry() { // return by reference
 
 typedef void (*funcType)(void);
 
-int regTest(funcType f, unsigned line, const char* file, const char* name) {
+int regTest(funcType f, const char* file, unsigned line, const char* name) {
     getTestRegistry().insert(Test(currentTestSuite(), name, f, file, line));
     return 0;
 }
@@ -268,7 +268,7 @@ but the TEST_CASE macro produces warnings with clang!
 
 </section><section data-markdown><!--//===============================================================================-->
 
-### silencing them in my header
+### silencing warnings in the header
 
 ```c++
 #if defined(__clang__)
@@ -287,7 +287,7 @@ every (decent) compiler can do this
 
 </section><section data-markdown><!--//===============================================================================-->
 
-### silencing them in macros used by the user
+### silencing warnings in macros
 
 ```c++
 #ifdef __clang__
@@ -295,7 +295,7 @@ every (decent) compiler can do this
     _Pragma("clang diagnostic push")                                        \
     _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"")           \
     static int DOCTEST_ANONYMOUS(DOCTEST_ANON_VAR_) =                       \
-                doctest::detail::regTest(f, __LINE__, __FILE__, name);      \
+                regTest(f, __LINE__, __FILE__, name);                       \
     _Pragma("clang diagnostic pop")
 #endif // __clang__
 
@@ -308,9 +308,9 @@ every (decent) compiler can do this
     DOCTEST_CREATE_AND_REGISTER(DOCTEST_ANONYMOUS(DOCTEST_ANON_FUNC_), name)
 ```
 
-</section><section data-markdown><!--//===============================================================================-->
+"_Pragma()" was standardized in C++11 but compilers support it for many years ("__pragma()" for MSVC) and since it's in the preprocessor "-std=c++98" doesn't bother us
 
-### silencing them in macros used by the user
+</section><section data-markdown><!--//===============================================================================-->
 
 but GCC also gives a warning - that the dummy int is not used
 
@@ -322,20 +322,22 @@ so... _Pragma() to the rescue? :)
 
 </section><section data-markdown><!--//===============================================================================-->
 
-_Pragma() in the C++ frontend of GCC (g++) isn't working in complex macros for quite some time (4+ years)
+_Pragma() in the C++ frontend of GCC (g++) isn't working in macros for quite some time (4+ years)
 
 - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55578
 - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69543
 
 and luckily I can solve the warning with
 
+```c++
 __attribute__((unused))
+```
 
 ```c++
 #if defined(__GNUC__) && !defined(__clang__)
 #define DOCTEST_REGISTER_FUNCTION(f, name)                                  \
     static int DOCTEST_ANONYMOUS(DOCTEST_ANON_VAR_) __attribute__((unused)) \
-        = doctest::detail::regTest(f, __LINE__, __FILE__, name);
+        = regTest(f, __LINE__, __FILE__, name);
 #endif // __GNUC__
 ```
 
@@ -345,9 +347,341 @@ so far I haven't been able to suppress only -Waggregate-return in the CHECK() ma
 
 > It's a completely anachronistic warning, since its motivation was to support backwards compatibility with C compilers that did not allow returning structures. Those compilers are long dead and are no longer of practical concern.
 
-so I disable it at the begining of my header and leave it undisabled (don't tell anyone!)
+so I disable it at the begining of my header and leave it unpopped (don't tell anyone!)
+
+</section><section style="font-size:30px"><!--//===============================================================================-->
+
+<h3>subcases</h3>
+
+<table style="border:none"><tr><td width=85%>
+Code
+</td><td>
+Output
+</td></tr><tr><td>
+<pre><code data-trim data-noescape>
+TEST_CASE("lots of nested subcases") {
+    cout << endl << "root" << endl;
+    SUBCASE("") {
+        cout << "1" << endl;
+        SUBCASE("") { cout << "1.1" << endl; }
+    }
+    SUBCASE("") {   
+        cout << "2" << endl;
+        SUBCASE("") { cout << "2.1" << endl; }
+        SUBCASE("") {
+            cout << "2.2" << endl;
+            SUBCASE("") {
+                cout << "2.2.1" << endl;
+                SUBCASE("") { cout << "2.2.1.1" << endl; }
+                SUBCASE("") { cout << "2.2.1.2" << endl; }
+            }
+        }
+        SUBCASE("") { cout << "2.3" << endl; }
+    }
+}
+</code></pre>
+</td><td>
+<pre>
+root
+1
+1.1
+
+root
+2
+2.1
+
+root
+2
+2.2
+2.2.1
+2.2.1.1
+
+root
+2
+2.2
+2.2.1
+2.2.1.2
+
+root
+2
+2.3
+</pre>
+</td></tr></table>
 
 </section><section data-markdown><!--//===============================================================================-->
+
+### subcase macro expansion
+
+```c++
+#define DOCTEST_SUBCASE(name)                                      \
+    if(const Subcase& DOCTEST_ANONYMOUS(DOCTEST_ANON_SUBCASE_) =   \
+        Subcase(name, __FILE__, __LINE__))
+```
+
+```c++
+SUBCASE("foo") {
+    // some code in here
+}
+```
+
+gets expanded to
+
+```c++
+if(const Subcase& DOCTEST_ANON_SUBCASE_54 = Subcase("foo", "main.cpp", 54)) {
+    // some code in here
+}
+```
+
+And the magic happens in the ctor/dtor of the ***Subcase*** class - each subcase is uniquely identified by the file and line
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### the *main()* entry point
+
+```c++
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
+```
+
+vs
+
+```c++
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.h"
+int main(int argc, char** argv) {
+    doctest::Context context;
+    context.setOption("abort-after", 5);  // stop after 5 failed assertions
+    context.applyCommandLine(argc, argv);
+    context.setOption("no-breaks", true); // don't break in the debugger
+    int res = context.run(); // run queries or run tests unless with --no-run
+    if(context.shouldExit()) // query flags (and --exit) rely on you doing this
+        return res;          // propagate the result of the tests
+    // your program
+    return res; // + your_program_res
+}
+```
+
+designed for easy interop with the host application
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### removing everything testing-related from the binary
+
+```c++
+#define DOCTEST_CONFIG_DISABLE // the magic identifier
+#include "doctest.h"
+```
+
+```c++
+#define DOCTEST_CREATE_AND_REGISTER_FUNCTION(f, name) \
+    template &lt;typename T&gt;                             \
+    static inline void f()
+
+#define DOCTEST_TEST_CASE(name)                       \
+    DOCTEST_CREATE_AND_REGISTER_FUNCTION(             \
+        DOCTEST_ANONYMOUS(DOCTEST_ANON_FUNC_), name)
+```
+
+so all test cases are turned into uninstantiated templates
+
+the linker doesn't even lift his finger
+
+</section><section data-markdown><!--//===============================================================================-->
+
+The ***DOCTEST_CONFIG_DISABLE*** identifier affects all macros - assertions are turned into a noop using ***((void)0)*** and subcases just vanish - leaving only the ***{}*** code block.
+
+This makes compilation and linking lightning fast - almost like the tests don't exist
+
+Most of the test runner is also removed
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### assertion macros
+
+3 levels - ***WARN***, ***CHECK*** and ***REQUIRE***
+
+- ***WARN*** - doesn't fail the test case but prints a message
+- ***CHECK*** - fails the test case and prints a message but continues
+- ***REQUIRE*** - fails the test case, prints and ends it immediately
+
+```c++
+WARN(true == false); // just a message
+CHECK(1 < 0);        // will fail the test case but continue
+REQUIRE(4 == 8);     // will end the test case
+REQUIRE(1 != 2);     // never reached
+```
+
+a standard C++ operator for the comparison is used - yet the full expression is decomposed and the left/right values are logged
+
+exceptions used for ***REQUIRE*** to terminate the current test case
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### expression decomposition
+
+```c++
+CHECK(a == b);
+```
+
+gets expanded to
+
+```c++
+do {
+    ResultBuilder rb("CHECK", "main.cpp", 76, "a == b");
+    try {
+        rb.setResult(ExpressionDecomposer() << a == b);
+    } catch(...) { rb.m_threw = true; }
+    if(rb.log()) // returns true if the expression is false (or threw)
+        DOCTEST_BREAK_INTO_DEBUGGER(); // a macro
+    rb.react(); // for REQUIRE macros will throw an exception
+} while(always_false());
+```
+
+In C++ the "<<" operator has higher precedence over "=="
+
+And that is how the expression decomposer captures the lhs
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### expression decomposition
+
+```c++
+struct ExpressionDecomposer {
+    template &lt;typename L&gt;
+    Expression_lhs&lt;const L&&gt; operator<<(const L& operand) {
+        return Expression_lhs&lt;const L&&gt;(operand); // returns a different type
+    }
+};
+```
+
+```c++
+template &lt;typename L&gt;
+struct Expression_lhs {
+    L lhs;
+    Expression_lhs(L in) : lhs(in) {}
+
+    // if not a binary expression
+    operator Result() { return Result(!!lhs, toString(lhs)); }
+
+    template &lt;typename R&gt; Result operator==(const R& rhs) {
+        return Result(lhs == rhs, stringifyBinaryExpr(lhs, "==", rhs));
+    }
+    template &lt;typename R&gt; Result operator!=(const R& rhs) {
+        return Result(lhs != rhs, stringifyBinaryExpr(lhs, "!=", rhs));
+    }
+};
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### expression decomposition
+
+```c++
+struct Result {
+    bool   passed;
+    String decomposition;
+    
+    Result(bool p, const String& d) : passed(p) , decomposition(d) {}
+    operator bool() { return !passed; }
+};
+```
+
+```c++
+template &lt;typename L, typename R&gt;
+String stringifyBinaryExpr(const L& lhs, const char* op, const R& rhs) {
+    return toString(lhs) + " " + op + " " + toString(rhs);
+}
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### stringification of types
+
+```c++
+
+template &lt;typename T&gt;
+String toString(const T& value) {
+    return StringMaker&lt;T&gt;::convert(value);
+}
+
+String toString(const char* in);
+String toString(bool in);
+String toString(float in);
+String toString(double in);
+String toString(char in);
+String toString(char unsigned in);
+String toString(int in);
+String toString(int unsigned in);
+```
+
+***toString()*** is the root of the stringification chain
+
+</section><section data-markdown><!--//===============================================================================-->
+
+```c++
+template &lt;bool C&gt; struct StringMakerBase {
+    template &lt;typename T&gt;
+    static String convert(const T&) { return "{?}"; } // default
+};
+template &lt;&gt; struct StringMakerBase&lt;true&gt; {
+    template &lt;typename T&gt;
+    static String convert(const T& in) {
+        std::ostream* stream = createStream();
+        *stream << in;
+        String result = getStreamResult(stream);
+        freeStream(stream);
+        return result;
+    }
+};
+template &lt;typename T&gt;
+struct StringMaker : StringMakerBase&lt;has_insertion_operator&lt;T&gt;::value&gt; {};
+```
+
+note that the operations with the stream use a pointer/reference
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### the has_insertion_operator trait
+
+```c++
+typedef char no;
+typedef char yes[2];
+
+struct any_t {
+    template <typename T>
+    any_t(const T&);
+};
+
+yes& testStreamable(std::ostream&);
+no   testStreamable(no);
+
+no operator<<(const std::ostream&, const any_t&);
+```
+
+```c++
+template <typename T>
+struct has_insertion_operator {
+    static std::ostream& s;
+    static const T&      t;
+    static const bool value = sizeof(testStreamable(s << t)) == sizeof(yes);
+};
+```
+
+</section><section data-markdown><!--//===============================================================================-->
+
+Using the ***StringMaker*** class allows for partial template specialization and thus a container like ***std::vector*** can be stringified easily - even if the second argument (allocator) might be different
+
+</section><section data-markdown><!--//===============================================================================-->
+
+forward declaration of std::ostream
+
+</section><section data-markdown><!--//===============================================================================-->
+
+</section><section data-markdown><!--//===============================================================================-->
+
+compile time lightness
+    benchmarks
+    how it is achieved
 
 </section><section data-markdown><!--//===============================================================================-->
 
@@ -356,30 +690,6 @@ went to great lengths to not make any compromises
 hit so many toolchain problems...
 
 personal favourites: -Winline -Weffc++ -Wstrict-overflow
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
-
-</section><section data-markdown><!--//===============================================================================-->
 
 </section><section data-markdown><!--//===============================================================================-->
 
@@ -422,6 +732,26 @@ That cancer tried it's best but I defeated it 2 days ago (deleted)
 
 [http://onqtam.github.io/slides/doctest.html](http://onqtam.github.io/slides/doctest.html)
 
+</section><section data-markdown><!--//===============================================================================-->
+
+http://onqtam.github.io/
+
+https://github.com/onqtam
+
+https://www.facebook.com/viktor.i.kirilov
+
+https://stackoverflow.com/users/3162383/onqtam
+
+https://www.linkedin.com/in/viktor-kirilov-98409a29
+
+https://twitter.com/KirilovVik
+
+vik.kirilov@gmail.com
+
+</section><section data-markdown><!--//===============================================================================-->
+
+# Q&A
+
 </section></div>
 <!-- ====================================================== -->
 <!-- ==================== SLIDES END ====================== -->
@@ -454,7 +784,7 @@ That cancer tried it's best but I defeated it 2 days ago (deleted)
 				progress: true,
 
 				// Display the page number of the current slide
-				slideNumber: false,
+				slideNumber: true,
 
 				// Push each slide change to the browser history
 				history: true,
