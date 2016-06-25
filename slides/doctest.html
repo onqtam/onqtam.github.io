@@ -351,7 +351,7 @@ so I disable it at the begining of my header and leave it unpopped (don't tell a
 
 </section><section style="font-size:30px"><!--//===============================================================================-->
 
-<h3>subcases</h3>
+<h2>subcases</h2>
 
 <table style="border:none"><tr><td width=85%>
 Code
@@ -490,6 +490,8 @@ the linker doesn't even lift his finger
 
 The ***DOCTEST_CONFIG_DISABLE*** identifier affects all macros - assertions are turned into a noop using ***((void)0)*** and subcases just vanish - leaving only the ***{}*** code block.
 
+It should be defined everywhere in a module (exe/dll)
+
 This makes compilation and linking lightning fast - almost like the tests don't exist
 
 Most of the test runner is also removed
@@ -618,6 +620,8 @@ String toString(int unsigned in);
 
 </section><section data-markdown><!--//===============================================================================-->
 
+### stringification of types
+
 ```c++
 template &lt;bool C&gt; struct StringMakerBase {
     template &lt;typename T&gt;
@@ -637,7 +641,15 @@ template &lt;typename T&gt;
 struct StringMaker : StringMakerBase&lt;has_insertion_operator&lt;T&gt;::value&gt; {};
 ```
 
-note that the operations with the stream use a pointer/reference
+```c++
+std::ostream* createStream();                 // defined in the test runner
+String        getStreamResult(std::ostream*); // defined in the test runner
+void          freeStream(std::ostream*);      // defined in the test runner
+```
+
+note that the operations with the stream use a pointer
+
+(operator<< takes a reference which is basically a pointer)
 
 </section><section data-markdown><!--//===============================================================================-->
 
@@ -648,7 +660,7 @@ typedef char no;
 typedef char yes[2];
 
 struct any_t {
-    template <typename T>
+    template &lt;typename T&gt;
     any_t(const T&);
 };
 
@@ -659,7 +671,7 @@ no operator<<(const std::ostream&, const any_t&);
 ```
 
 ```c++
-template <typename T>
+template &lt;typename T&gt;
 struct has_insertion_operator {
     static std::ostream& s;
     static const T&      t;
@@ -667,35 +679,79 @@ struct has_insertion_operator {
 };
 ```
 
-</section><section data-markdown><!--//===============================================================================-->
-
-Using the ***StringMaker*** class allows for partial template specialization and thus a container like ***std::vector*** can be stringified easily - even if the second argument (allocator) might be different
-
-</section><section data-markdown><!--//===============================================================================-->
-
-forward declaration of std::ostream
+```c++
+bool is_int_ostream_streamable = has_insertion_operator&lt;int&gt;::value;
+```
 
 </section><section data-markdown><!--//===============================================================================-->
 
+### forward declaring std::ostream
+
+```c++
+#ifdef __clang__
+    #include &lt;ciso646&gt; // to detect if libc++ is being used with clang
+#endif // __clang__
+```
+
+```c++
+#ifdef _LIBCPP_VERSION
+    // forward declaration was troublesome and &lt;iosfwd&gt; is very light in libc++
+    #include &lt;iosfwd&gt;
+#else // _LIBCPP_VERSION
+    namespace std // forbidden by the standard but works like a charm
+    {
+        template &lt;class charT&gt;                struct char_traits;
+        template &lt;&gt;                           struct char_traits&lt;char&gt;;
+        template &lt;class charT, class traits&gt;  class basic_ostream;
+        typedef basic_ostream&lt;char, char_traits&lt;char&gt; &gt; ostream;
+    }
+#endif // _LIBCPP_VERSION
+```
+
+If the user wants to be pedantic - there is a configuration identifier - ***DOCTEST_CONFIG_USE_IOSFWD*** - that forces doctest to include "iosfwd" and not forward declare types from std
+
 </section><section data-markdown><!--//===============================================================================-->
 
-compile time lightness
-    benchmarks
-    how it is achieved
+### STRINGIFICATION OF TYPES
+
+- An overload of "toString()" can be provided for user types
+
+- Types that are "std::ostream" streamable work out of the box
+
+- Using the "StringMaker" class allows for partial template specialization and thus a container like "std::vector" can be stringified easily - without being concrete about the allocator
+
+- The default stringification of types is "{?}"
 
 </section><section data-markdown><!--//===============================================================================-->
 
-went to great lengths to not make any compromises
+A lot of effort went into:
 
-hit so many toolchain problems...
+- not dragging any headers (except in the implementation file)
+- warning-free 220+ different builds running cleanly through valgrind/sanitizers (more than 100 hours went into this)
 
-personal favourites: -Winline -Weffc++ -Wstrict-overflow
+The usual suspects (problematic warnings) are:
+
+- -Winline
+- -Weffc++
+- -Wstrict-overflow
+
+A valgrind error took me 3-4 days to track it down - only with g++4.8 and only in release - strcmp() was reading strings in chunks of 4 bytes for speed and if a string didn't have a length multiple of 4 - valgrind complained
+
+Hit MANY other toolchain problems
+
+</section><section data-markdown><!--//===============================================================================-->
+
+### benchmarks
+
+all this leads to:
+
+the doctest header is ~50 times lighter on compile times for inclusion compared to Catch (<10ms compared to 450ms)
 
 </section><section data-markdown><!--//===============================================================================-->
 
 ### roadmap
 
-- improved startup time - less alocations
+- improved startup time - less allocations
 - a mechanism for translating user defined exceptions
 - crash handling: signals on UNIX (and SE on Windows)
 - support for tagging - separate from test case names
