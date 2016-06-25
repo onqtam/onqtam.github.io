@@ -727,6 +727,7 @@ If the user wants to be pedantic - there is a configuration identifier - ***DOCT
 A lot of effort went into:
 
 - not dragging any headers (except in the implementation file)
+    - this meant implementing my own String class
 - warning-free 220+ different builds running cleanly through valgrind/sanitizers (more than 100 hours went into this)
 
 The usual suspects (problematic warnings) are:
@@ -743,9 +744,11 @@ Hit MANY other toolchain problems
 
 ### benchmarks
 
-all this leads to:
+- the doctest header is ~50 times lighter on compile times for inclusion compared to Catch (<10ms compared to 450ms)
 
-the doctest header is ~50 times lighter on compile times for inclusion compared to Catch (<10ms compared to 450ms)
+- the doctest header is less than 600 lines of code after the preprocessor - compared to the 400k of Catch
+
+- just including the iosfwd header with MSVC leads to ~40k lines of code after the preprocessor compared to the 200 of clang with libc++
 
 </section><section data-markdown><!--//===============================================================================-->
 
