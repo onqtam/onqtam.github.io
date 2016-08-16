@@ -81,11 +81,11 @@
         function CalcAge() {
             var now = new Date();
             var age = now.getFullYear() - 1991;
-            var mdif = now.getMonth() - 5; //0=jan
+            var mdif = now.getMonth() - 10; //0=jan 10=nov
             if (mdif < 0) {
                 --age;
             } else if (mdif == 0) {
-                var ddif = now.getDate() - 25;
+                var ddif = now.getDate() - 8;
                 if (ddif < 0) {
                     --age;
                 }
