@@ -29,6 +29,8 @@ GEM
       pathutil (~> 0.9)
       rouge (~> 1.7)
       safe_yaml (~> 1.0)
+    jekyll-archives (2.1.1)
+      jekyll (>= 2.4)
     jekyll-feed (0.9.1)
       jekyll (~> 3.3)
     jekyll-gist (1.4.0)
@@ -36,6 +38,8 @@ GEM
     jekyll-paginate (1.1.0)
     jekyll-sass-converter (1.5.0)
       sass (~> 3.4)
+    jekyll-seo-tag (2.1.0)
+      jekyll (~> 3.3)
     jekyll-sitemap (1.0.0)
       jekyll (~> 3.3)
     jekyll-watch (1.5.0)
@@ -90,6 +94,13 @@ PLATFORMS
 
 DEPENDENCIES
   jekyll (= 3.4.0)
+  jekyll-archives
+  jekyll-feed (~> 0.6)
+  jekyll-gist
+  jekyll-paginate
+  jekyll-seo-tag
+  jekyll-sitemap
+  jemoji
   minima (~> 2.0)
   minimal-mistakes-jekyll
   tzinfo-data

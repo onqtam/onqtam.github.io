@@ -21,12 +21,13 @@ gem "minima", "~> 2.0"
 # If you have any plugins, put them here!
 group :jekyll_plugins do
    gem "minimal-mistakes-jekyll"
-   #gem "jekyll-feed", "~> 0.6"
-   #gem 'jekyll-sitemap'
-   #gem 'jekyll-archives'
-   #gem 'jekyll-seo-tag'
-   #gem 'jekyll-paginate'
-   #gem 'jemoji'
+   gem "jekyll-feed", "~> 0.6"
+   gem 'jekyll-sitemap'
+   gem 'jekyll-archives'
+   gem 'jekyll-seo-tag'
+   gem "jekyll-gist"
+   gem 'jekyll-paginate'
+   gem 'jemoji'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

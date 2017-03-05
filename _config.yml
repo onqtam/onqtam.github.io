@@ -22,7 +22,7 @@ words_per_minute         : 200
 comments:
   provider               : "disqus" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
   disqus:
-    shortname            : # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
+    shortname            : "onqtam" # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
   discourse:
     server               : # https://meta.discourse.org/t/embedding-discourse-comments-via-javascript/31963 , e.g.: meta.discourse.org
   facebook:
@@ -73,6 +73,7 @@ social:
     - https://slides.com/onqtam
     - https://www.reddit.com/user/onqtam
     - https://www.patreon.com/onqtam
+    - https://disqus.com/by/onqtam
     - https://projecteuler.net/profile/onqtam.png
 
 # Analytics
@@ -142,6 +143,8 @@ exclude:
   - Rakefile
   - README
   - tmp
+  - run.bat
+  - build.bat
   - /docs # ignore Minimal Mistakes /docs
   - /test # ignore Minimal Mistakes /test
 keep_files:
@@ -190,6 +193,7 @@ gems:
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
+  - jekyll-archives
   - jemoji
 
 # mimic GitHub Pages with --safe
@@ -198,6 +202,7 @@ whitelist:
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
+  - jekyll-archives
   - jemoji
 
 
