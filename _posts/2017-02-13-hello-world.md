@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title:  "Hello World!"
 date:   2017-02-12 23:04:34 +0200
 categories: misc
