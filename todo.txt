@@ -3,12 +3,12 @@ TODO:
 - description
 - picture of me
 - link to cv which is in assets
-- figure out how to use images in "_includes/author-profile-custom-links.html"
 - SEO - http://jekyll.tips/jekyll-casts/seo-in-jekyll/
-- archives - figure out what exactly I want
+- archives - figure out what exactly I want (jekyll-archives not allowed on gh-pages?)
 
 - search in site
 - table of contents
+- images in "_includes/author-profile-custom-links.html" for the rest of them - sadly nothing here - http://fontawesome.io/icons/
 
 - jekyll multi lang?                        jekyll-language-plugin
 - https? must pay lots of money...

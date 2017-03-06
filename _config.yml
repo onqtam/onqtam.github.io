@@ -78,7 +78,7 @@ analytics:
 # Site Author
 author:
   name             : "Viktor Kirilov"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "/assets/images/me.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "A C++ enthusiast on a quest to build an awesome indie game studio. I speak for myself."
   location         : "Sofia, Bulgaria"
   email            : vik.kirilov@gmail.com
