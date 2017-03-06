@@ -137,6 +137,7 @@ exclude:
   - Gruntfile.js
   - gulpfile.js
   - LICENSE
+  - CNAME
   - log
   - node_modules
   - package.json
