@@ -4,5 +4,5 @@ main:
     url: /about
   - title: "Sitemap"
     url: /sitemap
-  - title: "Archive"
-    url: /archive
+  - title: "Archive by year"
+    url: /year-archive
