@@ -1,9 +1,36 @@
 ---
 title:  "Hello world!"
-date:   2017-03-06 12:04:34 +0200
+date:   2017-03-06 16:04:34 +0200
 categories: misc
 tags: [misc, entrepreneurship]
 ---
+
+the entrepreneurship journey
+
+the not-just-about-gamedev blog
+
+== 1st post:
+
+- a loud hello world!
+- my name
+- what this blog is about (entrepreneurship not only in business) - tech/startups/motivation/fitness/health/swimming/other
+- maybe an entry per month...
+
+- my new schedule and work ethic
+- why I stopped smoking weed - I lied to a friend out of shame - was in no condition to meet in person and talk about anything important.
+
+i am not happy when im not performing up to my standards
+
+
+"troubles through enterpreneurship"
+"loud first post"
+
+
+
+
+
+
+
 
 {% highlight ruby linenos %}
 def print_hi(name)

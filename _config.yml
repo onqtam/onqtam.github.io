@@ -55,9 +55,9 @@ yandex_site_verification :
 
 # Social Sharing
 twitter:
-  username               : KirilovVik
+  username               : "KirilovVik"
 facebook:
-  username               :
+  username               : "viktor.i.kirilov"
   app_id                 :
   publisher              :
 og_image                 : # Open Graph/Twitter default site image
@@ -241,16 +241,22 @@ compress_html:
   ignore:
     envs: development
 
-
 # Defaults
 defaults:
+  # _pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
   # _posts
   - scope:
       path: ""
       type: posts
     values:
       layout: single
-      author_profile: true
+      author_profile: false
       read_time: true
       comments: true
       share: true

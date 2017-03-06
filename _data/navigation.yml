@@ -1,6 +1,8 @@
 # main links
 main:
   - title: "About"
-    url: /about/
+    url: /about
   - title: "Sitemap"
-    url: /sitemap/
+    url: /sitemap
+  - title: "Archive"
+    url: /archive

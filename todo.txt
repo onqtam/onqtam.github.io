@@ -1,0 +1,16 @@
+blog
+- analytics!
+- rss
+- Estimated Reading Time for posts
+- social sharing links
+- comments
+- pagination?
+
+- archive?
+- search in site
+- table of contents
+
+- jekyll multi lang?                        jekyll-language-plugin
+- https? must pay lots of money...
+
+TODO: read about each of the added plugins - how to actually use! (for example the seo tags)
