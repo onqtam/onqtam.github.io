@@ -144,6 +144,7 @@ exclude:
   - tmp
   - run.bat
   - build.bat
+  - todo.txt
   - /docs # ignore Minimal Mistakes /docs
   - /test # ignore Minimal Mistakes /test
 keep_files:
@@ -180,9 +181,9 @@ sass:
 
 
 # Outputting
-permalink: /:categories/:title/
+permalink: /:categories/:year-:month-:day-:title/
 paginate: 5 # amount of posts to show
-paginate_path: /page:num/
+paginate_path: /page-:num/
 timezone: # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 
