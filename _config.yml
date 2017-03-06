@@ -67,12 +67,6 @@ social:
   type                   : # Person or Organization (defaults to Person)
   name                   : # If the user or organization name differs from the site's name
   links: # An array of links to social media profiles
-    - https://goodreads.com/onqtam
-    - https://slides.com/onqtam
-    - https://www.reddit.com/user/onqtam
-    - https://www.patreon.com/onqtam
-    - https://disqus.com/by/onqtam
-    - https://projecteuler.net/profile/onqtam.png
 
 # Analytics
 analytics:
@@ -118,8 +112,6 @@ include:
   - .htaccess
   - _pages
 exclude:
-  - "*.sublime-project"
-  - "*.sublime-workspace"
   - vendor
   - .asset-cache
   - .bundle
@@ -128,25 +120,15 @@ exclude:
   - assets/js/plugins
   - assets/js/_main.js
   - assets/js/vendor
-  - Capfile
-  - CHANGELOG
-  - config
   - Gemfile
-  - Gruntfile.js
-  - gulpfile.js
-  - LICENSE
   - CNAME
-  - log
   - node_modules
   - package.json
   - Rakefile
   - README
-  - tmp
   - run.bat
   - build.bat
   - todo.txt
-  - /docs # ignore Minimal Mistakes /docs
-  - /test # ignore Minimal Mistakes /test
 keep_files:
   - .git
   - .svn
