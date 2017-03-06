@@ -3,13 +3,7 @@ TODO:
 - description
 - picture of me
 - link to cv which is in assets
-- the other media links
-    - https://goodreads.com/onqtam
-    - https://slides.com/onqtam
-    - https://www.reddit.com/user/onqtam
-    - https://www.patreon.com/onqtam
-    - https://disqus.com/by/onqtam
-    - https://projecteuler.net/profile/onqtam.png
+- figure out how to use images in "_includes/author-profile-custom-links.html"
 - SEO - http://jekyll.tips/jekyll-casts/seo-in-jekyll/
 - archives - figure out what exactly I want
 
