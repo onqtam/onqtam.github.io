@@ -18,7 +18,7 @@ baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
-words_per_minute         : 150
+words_per_minute         : 140
 comments:
   provider               : "disqus" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
   disqus:
@@ -99,14 +99,14 @@ author:
   linkedin         : viktor-kirilov-98409a29
   pinterest        :
   soundcloud       :
-  stackoverflow    : 3162383/onqtam
-  steam            : KirilovVik
+  stackoverflow    :
+  steam            :
   tumblr           :
   twitter          : KirilovVik
   vine             :
   weibo            :
   xing             :
-  youtube          : https://www.youtube.com/user/onqtam
+  youtube          :
 
 
 # Reading Files

@@ -15,7 +15,7 @@ There are a couple of recent changes in my life:
 - I started reading books - about self improvement, economics, motivation, fitness, entrepreneurship, business, software development, biographies and others - but not fiction (not enough time for that).
 - Since the 4th of November 2016 I no longer play or follow [DotA](https://en.wikipedia.org/wiki/Defense_of_the_Ancients).
 - Since the 1st of January 2017 I stopped drinking alcohol completely and started exercising regularly.
-- Since the 10th of February 2017 I stopped smoking weed for good because I lied to a friend - bailed on an agreed upon meeting being in no condition to talk about anything... I don't remember the last time I had lied about anything - and suddenly I had compromised my integrity. I felt **huge regret and shame**. This really hurt me. No more wasting precious time and life.
+- Since the 10th of February 2017 I stopped smoking weed for good because I lied to a friend - bailed on an agreed upon meeting being in no condition to talk about anything... I don't remember the last time I had lied about anything - and suddenly I had compromised my integrity. I felt **huge regret and shame**. This really hurt me. No more wasted life.
 
 ## The purpose of this post
 
