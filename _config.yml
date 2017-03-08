@@ -12,7 +12,7 @@ locale                   : "en"
 title                    : "Not just gamedev"
 title_separator          : "-"
 name                     : "Viktor Kirilov"
-description              : "An amazing website."
+description              : "Blog about game development, C++, programming, entrepreneurship, motivation, books, fitness, swimming, health and other parts of life."
 url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
@@ -69,6 +69,9 @@ social:
   type                   : # Person or Organization (defaults to Person)
   name                   : # If the user or organization name differs from the site's name
   links: # An array of links to social media profiles
+    - https://twitter.com/KirilovVik
+    - https://www.facebook.com/viktor.i.kirilov
+    - https://github.com/onqtam
 
 # Analytics
 analytics:
@@ -81,7 +84,7 @@ analytics:
 author:
   name             : "Viktor Kirilov"
   avatar           : "/assets/images/me.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "A C++ enthusiast on a quest to build an awesome indie game studio. I speak for myself."
+  bio              : "A C++ developer set out to build a game studio. <br /> I speak for myself."
   location         : "Sofia, Bulgaria"
   email            : vik.kirilov@gmail.com
   uri              :
@@ -176,7 +179,6 @@ gems:
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
-  - jekyll-archives
   - jemoji
 
 # mimic GitHub Pages with --safe
@@ -185,7 +187,6 @@ whitelist:
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
-  - jekyll-archives
   - jemoji
 
 

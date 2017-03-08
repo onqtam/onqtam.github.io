@@ -2,16 +2,12 @@ personal site - http://onqtam.com
 
 ### Future posts:
 
-- the game project
 - fitness
+- my gaming past
+- the team
+- the game project
 
 ### TODO:
-
-- about page
-- description
-- SEO - http://jekyll.tips/jekyll-casts/seo-in-jekyll/       https://github.com/hmfaysal/hmfaysal-omega-theme
-
-and others not so important/clear
 
 - maybe tweak the post text color to be a bit darker - as noted by AG
 - 404 page
