@@ -1,6 +1,10 @@
 ---
 title:  "My hello world!"
 date:   2017-03-08 18:04:34 +0200
+header:
+  overlay_image:  "/assets/images/my_hello_world.png"
+
+teaser: "/assets/images/my_hello_world.jpg"
 categories: misc
 tags: [misc, entrepreneurship]
 excerpt: "The beginning of my new work ethic I pledge to follow from the early days of March 2017. The goal is to get more shit done and startup a game studio."
@@ -8,13 +12,13 @@ excerpt: "The beginning of my new work ethic I pledge to follow from the early d
 
 My name is Viktor Kirilov (25 y/o) and I have 3.5 years of professional experience as a C++ developer in both the games and the VFX industries.
 
-15 months ago I quit my job at [ChaosGroup](https://www.chaosgroup.com/) to pursue personal projects - mainly a game (and game engine). I will write about that in future posts. Before that I worked in [Gameloft](https://en.wikipedia.org/wiki/Gameloft) for 1 year as a game programmer.
+15 months ago I quit my job at [ChaosGroup](https://www.chaosgroup.com/){:target="_blank"} to pursue personal projects - mainly a game (and game engine). I will write about that in future posts. Before that I worked in [Gameloft](https://en.wikipedia.org/wiki/Gameloft){:target="_blank"} for 1 year as a game programmer.
 
-There is also my open source [doctest](https://github.com/onqtam/doctest) testing framework which is me being a geek - I learned (and continue to do so) a lot about software development, open source, marketing and the internet from it, but it will in no way financially justify the 4+ months of work (and more to come) I've put into it.
+There is also my open source [doctest](https://github.com/onqtam/doctest){:target="_blank"} testing framework which is me being a geek - I learned (and continue to do so) a lot about software development, open source, marketing and the internet from it, but it will in no way financially justify the 4+ months of work (and more to come) I've put into it.
 
 There are a couple of recent changes in my life:
 - I started reading books - about self improvement, economics, motivation, fitness, entrepreneurship, business, software development, biographies and others - but not fiction (not enough time for that).
-- Since the 4th of November 2016 I no longer play or follow [DotA](https://en.wikipedia.org/wiki/Defense_of_the_Ancients).
+- Since the 4th of November 2016 I no longer play or follow [DotA](https://en.wikipedia.org/wiki/Defense_of_the_Ancients){:target="_blank"}.
 - Since the 1st of January 2017 I stopped drinking alcohol completely and started exercising regularly.
 - Since the 10th of February 2017 I stopped smoking weed for good because I lied to a friend - bailed on an agreed upon meeting being in no condition to talk about anything... I don't remember the last time I had lied about anything - and suddenly I had compromised my integrity. I felt **huge regret and shame**. I hated myself for it. No more wasted life.
 
