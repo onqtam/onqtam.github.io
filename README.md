@@ -13,6 +13,7 @@ personal site - http://onqtam.com
 
 and others not so important/clear
 
+- maybe tweak the post text color to be a bit darker - as noted by AG
 - 404 page
 - archives - figure out what exactly I want (jekyll-archives not allowed on gh-pages?)
 - search in site
