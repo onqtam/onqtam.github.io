@@ -18,7 +18,7 @@ baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
-words_per_minute         : 120
+words_per_minute         : 150
 comments:
   provider               : "disqus" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
   disqus:
@@ -127,10 +127,9 @@ exclude:
   - node_modules
   - package.json
   - Rakefile
-  - README
+  - README.md
   - run.bat
   - build.bat
-  - todo.txt
 keep_files:
   - .git
   - .svn
@@ -241,7 +240,7 @@ defaults:
       type: posts
     values:
       layout: single
-      author_profile: false
+      author_profile: true
       read_time: true
       comments: true
       share: true
