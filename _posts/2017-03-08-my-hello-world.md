@@ -3,8 +3,6 @@ title:  "My hello world!"
 date:   2017-03-08 18:04:34 +0200
 header:
   overlay_image:  "/assets/images/my_hello_world.png"
-
-teaser: "/assets/images/my_hello_world.jpg"
 categories: misc
 tags: [misc, entrepreneurship]
 excerpt: "The beginning of my new work ethic I pledge to follow from the early days of March 2017. The goal is to get more shit done and startup a game studio."
