@@ -16,15 +16,18 @@ Unfortunately none of the current solutions really clicks with me:
     - raises concerns about compile times
     - no way to annotate fields in a custom way
 - external tooling (such as libClang - see [siplasplas](https://github.com/Manu343726/siplasplas){:target="_blank"} and [CPP-Reflection](https://github.com/AustinBrunkhorst/CPP-Reflection){:target="_blank"}):
-    - makes build setups complicated
+    - makes build setups complicated (especially if your main compiler is not Clang (say MSVC))
     - not sure about the impact on compile times
-    - no way to annotate fields in a custom way (unless I modify Clang to understand ```[[custom_tag]]```)
+    - annotating fields in a custom way is not straightforward (although some developers have reported having success using ```__attribute__```)
+- explicitly registering each field outside of the class definition:
+    - violates the [DRY principle](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself){:target="_blank"}
+    - some implementations are intrusive - like [this one](https://github.com/simonask/reflect){:target="_blank"}
 
 I also tried with a DSL (not in C++) which got parsed by a python script and C++ code got emitted but found it too much work to make it support complex C++ types - teaching it about templates, variants and typedefs just got hairy very quickly (not a parser expert).
 
 ## What I came up with
 
-The [cmake-reflection-template](https://github.com/onqtam/cmake-reflection-template){:target="_blank"} repository is a small working example of a few source files with added reflection which generates serialization and deserialization routines (using ```std::any<>``` - so it requires C++17 - but it can be rewritten to serialize to JSON instead).
+The [cmake-reflection-template](https://github.com/onqtam/cmake-reflection-template){:target="_blank"} repository is a small working example of a few source files with added reflection which generates serialization and deserialization routines (using ```std::any<>``` for simplicity - so it requires C++17 - but it can be rewritten to serialize to JSON instead).
 
 - each CMake target that wants to have reflection should have the [```target_parse_sources()```](https://github.com/onqtam/cmake-reflection-template/blob/master/scripts/utils.cmake#L16){:target="_blank"} CMake function called on it [like so](https://github.com/onqtam/cmake-reflection-template/blob/master/CMakeLists.txt#L10){:target="_blank"}
 - each source file in the reflected projects has an attached custom CMake command so when it gets modified that command gets ran
@@ -76,7 +79,7 @@ void deserialize(const any& src, Foo& dst) {
 }
 ```
 
-[cmake-reflection-template](https://github.com/onqtam/cmake-reflection-template){:target="_blank"} is meant to be used as an initial starting point and it is expected to be modified by anyone using it to better suit their needs - perhaps to tweak the parsing, to use JSON instead of ```std::any<>```, to add prefixes to the macros or to change what code gets emitted. The CMake part is solid and the rest can be viewed as a proof of concept. One might even rewrite the parser in a different language! I'm no expert in templating engines or writing parsers so the python script (located in [```/scripts/```](https://github.com/onqtam/cmake-reflection-template/tree/master/scripts){:target="_blank"}) is nothing special but what I've got is good enough for my needs.
+[cmake-reflection-template](https://github.com/onqtam/cmake-reflection-template){:target="_blank"} is meant to be used as an initial starting point and it is expected to be modified by anyone using it to better suit their needs - perhaps to tweak the parsing, to use JSON instead of ```std::any<>```, to add prefixes to the macros, to add the notion of class descriptions or to change what code gets emitted. The CMake part is solid and the rest can be viewed as a proof of concept. One might even rewrite the parser in a different language! I'm no expert in templating engines or writing parsers so the python script (located in [```/scripts/```](https://github.com/onqtam/cmake-reflection-template/tree/master/scripts){:target="_blank"}) is nothing special but what I've got is good enough for my needs so far.
 
 ## Support for attributes and tags
 
@@ -132,6 +135,8 @@ Also when the parser itself is modified - all generated code in ```${CMAKE_BINAR
 
 - Types in namespaces not supported (but should be easy to extend).
 - Nested types not supported (maybe easy).
+- Inheritance not supported (but should be easy with class attributes)
+- Templated types - haven't thought about it but a solution must exists
 - ```FIELD``` has to be used when declaring class fields - otherwise they will be skipped. This greatly simplifies the parser - but I'd be happy if the parser improved and all fields got parsed by default - and perhaps skipping fields should happen only when annotated explicitly to be skipped.
 - Currently all generated ```.inl``` files go into the ```gen``` folder of the CMake build folder - that means that if 2 files in any of the projects (CMake targets) are named identically - there would be a clash. This can be alleviated if the CMake script is improved a bit.
 - Cannot declare multiple fields on the same line: ```FIELD int x, y, z;``` - but I don't like that style anyway.
@@ -141,11 +146,11 @@ Also when the parser itself is modified - all generated code in ```${CMAKE_BINAR
 
 In my (cleverly titled) [game](https://github.com/onqtam/game){:target="_blank"} project I use reflection extensively. So far I generate only serialization/deserialization and GUI binding routines (3 functions per type) on top of which I've built the following:
 
-- reloadable .dll plugins (in conjunction with the use of [dynamix](https://github.com/iboB/dynamix){:target="_blank"}) - even with the ability to change the layout of types at runtime! (by serializing object state, recreating them and then deserializing the old state)
+- reloadable .dll plugins (with the help of [dynamix](https://github.com/iboB/dynamix){:target="_blank"}) - even with the ability to change the layout of types at runtime! (by serializing object state, recreating the instances and then deserializing the old state)
 - generic undo/redo system
 
-I also like how composable everything is with the serialization/deserialization routines. In a few headers I provide overloads for the primitive types and for a few containers like ```std::vector<>``` (and maybe types from third parties) - and from then on the generated routines by the reflection for all my types call overloads for each of the fields of my types - composes quite nicely - I originally heard of such composing in [this talk](https://www.youtube.com/watch?v=Njjp_MJsgt8){:target="_blank"} about [```hash_append```](https://github.com/HowardHinnant/hash_append){:target="_blank"}!
-
 I might expand on that in a future post.
+
+I also like how composable everything is with the serialization/deserialization routines. In a few headers I provide overloads for the primitive types and for a few containers like ```std::vector<>``` (and maybe types from third party libraries) - and from then on the generated routines for all my types call overloads for each of their fields - composes quite nicely - I was originally exposed to the idea of such composability in [this talk](https://www.youtube.com/watch?v=Njjp_MJsgt8){:target="_blank"} about [```hash_append```](https://github.com/HowardHinnant/hash_append){:target="_blank"}!
 
 Thanks for reading :)
