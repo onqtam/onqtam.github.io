@@ -39,7 +39,9 @@ The rest of the photos I took can be found on [facebook](https://www.facebook.co
 
 I attended only 2-3 sessions before mine (which was about [doctest](https://github.com/onqtam/doctest){:target="_blank"} and was [on the 4-th day from 2 pm.](https://cppcon2017.sched.com/event/BgsI/mix-tests-and-production-code-with-doctest-implementing-and-using-the-fastest-modern-c-testing-framework){:target="_blank"}) and the reason for that was that I wasn't fully prepared with my talk. I stayed many hours in my hotel room fixing slides and rehearsing - things I really should have done in advance. I didn't get to meet awesome people as much as I wanted to precisely because of that and I missed a bunch of talks I wanted to see and now I'll be watching them on youtube from home... After my presentation I went to talks non-stop and finally enjoyed the conference to the fullest extent possible.
 
-My session was recieved very positively (even though the room wasn't full) - I think everyone that attended got something out of it - some people even mentioned my session in [their trip reports](http://web.cynd.net/~willo/cppcon-2017-trip-report/){:target="_blank"} :). The slides can be found [here](http://slides.com/onqtam/2017_cppcon_doctest){:target="_blank"} (video will be linked to when its uploaded as well).
+My session was recieved very positively (even though the room wasn't full) - I think everyone that attended got something out of it - some people even mentioned my session in [their trip reports](http://web.cynd.net/~willo/cppcon-2017-trip-report/){:target="_blank"} :) - the slides can be found [here](http://slides.com/onqtam/2017_cppcon_doctest){:target="_blank"}.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/eH1CxEC29l8" frameborder="0" allowfullscreen></iframe>
 
 I had a lightning talk on the 2-nd day and I thought to myself: "It's just 5 minutes - what can possibly go wrong!". Well on the 2-nd minute my mouth was already super dry and I had trouble speaking. On the 3-rd minute I wanted to quit so badly - I even started mumbling and made a comment about the dryness of my mouth - so unprofessional. I made it through the 5 minutes, but all I wanted was for it to be over - I **HATED** each second of that experience - I could hear myself talk in the worse possible accent because I couldn't move my tongue freely - every word was a struggle. When the session was over I quickly hid somewhere and stayed there for 10-20 minutes - I was so ashamed. The next 20 hours I felt like complete shit (even in the next day) - I hadn't felt so low in the past couple of years - not even after personal dramas and rejections - nothing got to my self-esteem as much as failing in front of a couple houndred people + being filmed. I tried cheering up myself by saying "it can't have been that bad" and "I won't forget to bring water for my big talk" but you can't rationalize yourself out of feelings... Feelings are king. I also had trouble sleeping and had nightmares how I fail much more spectacularly on my upcoming talk and I quit programming for good... So what I did on the next day was I made a 4 hour walk around Bellevue - went to a few parks, touched the water in the bay. After 2-3 hours of walking under the sunshine in the perfect weather - I smiled for the first time.
 
@@ -68,8 +70,6 @@ If you're wondering which C++17 features are worth adopting and how to evaluate 
 
 This was so great! So many niche details and insights into how and why compiler implementers make the choices they make - we need more sessions of this kind - such information is so hard to find and is also so entertaining!
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/9RFYVbHRoLg" frameborder="0" allowfullscreen></iframe>
-
 ### Nicholas Ormrod - ["Fantastic Algorithms and Where To Find Them"](https://cppcon2017.sched.com/event/Bgtx/fantastic-algorithms-and-where-to-find-them){:target="_blank"}
 
 A few niche but interesting algorithms - and a good conclusion about algorithms in general.
@@ -93,8 +93,6 @@ Chandler made a very compelling presentation - as usual! Make sure to watch the 
 ### Matt Godbolt - ["Unbolting the Compiler's Lid: What Has My Compiler Done for Me Lately?"](https://cppcon2017.sched.com/event/BguG/unbolting-the-compilers-lid-what-has-my-compiler-done-for-me-lately){:target="_blank"}
 
 This was an excellent talk targeting both beginners and advanced coders showing us a thing or two about the assembly the compilers generate and also showcasing the [compiler explorer](https://godbolt.org/).
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/bSkpMdDe4g4" frameborder="0" allowfullscreen></iframe>
 
 ### Michael Spencer - ["My Little Object File: How Linkers Implement C++"](https://cppcon2017.sched.com/event/C5ow/my-little-object-file-how-linkers-implement-c){:target="_blank"}
 
