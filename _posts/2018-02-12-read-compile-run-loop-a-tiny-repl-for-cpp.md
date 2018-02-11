@@ -178,7 +178,7 @@ Actually the [RCRL](https://github.com/onqtam/rcrl) engine can reside also in so
 The entire "API" of [RCRL](https://github.com/onqtam/rcrl) is just a few functions in [```<repo>/src/rcrl/rcrl.h```](https://github.com/onqtam/rcrl/blob/master/src/rcrl/rcrl.h) which have a lot of comments for them and it is used in [```<repo>/src/main.cpp```](https://github.com/onqtam/rcrl/blob/master/src/main.cpp).
 
 ```c++
-void cleanup_plugins();
+std::string cleanup_plugins(bool redirect_stdout = false);
 bool submit_code(std::string code, Mode default_mode, bool* used_default_mode = 0);
 bool is_compiling();
 bool try_get_exit_status_from_compile(int& exitcode);
