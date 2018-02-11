@@ -4,7 +4,7 @@ date:   2017-10-04 14:01:34 +0200
 header:
   overlay_image:  "/assets/images/cppcon_2017.jpg"
 categories: misc
-tags: [conference, misc]
+tags: [conference, misc, C++]
 excerpt: "Lessons learned from attending and speaking at CppCon for the first time"
 ---
 

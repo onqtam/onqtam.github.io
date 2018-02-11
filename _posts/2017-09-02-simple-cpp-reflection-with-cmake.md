@@ -4,7 +4,7 @@ date:   2017-09-02 21:04:34 +0200
 header:
   overlay_image:  "/assets/images/reflection.png"
 categories: programming
-tags: [programming, reflection, cmake]
+tags: [programming, reflection, cmake, C++]
 excerpt: "Adding reflection to codebases without heavy template metaprogramming or external tools such as LibClang"
 ---
 
