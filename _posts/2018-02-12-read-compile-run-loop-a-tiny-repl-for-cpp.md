@@ -12,7 +12,7 @@ Ever wanted to modify some value or execute some (complex) statement while your 
 
 For C++ there is the [cling](https://github.com/root-project/cling) project developed by researchers at CERN but it is built on top of LLVM and to say that it isn't trivial to integrate in your application so everything is callable and to have that working on any platform and toolchain would be a huge understatement.
 
-Out of frustration with the underdeveloped bindings with the scripting language used at a past job I came up with an idea how to make something which behaves almost as an interactive C++ interpreter with very few restrictions - and the [RCRL](https://github.com/onqtam/rcrl) project is a demo application with GUI which demonstrates the technique. Without further ado here is a video showcasing it:
+Out of frustration with the underdeveloped bindings with the scripting language used at a past job I came up with an idea how to make something which behaves almost as an interactive C++ interpreter with very few restrictions - and the [RCRL](https://github.com/onqtam/rcrl) project is a demo application with GUI which demonstrates the technique. Without further ado here is a showcasing video:
 
 // insert youtube video here
 
