@@ -56,8 +56,8 @@ When we are done we can press the ```Cleanup``` button which will:
 
 Here is what happens each time you submit code:
 
-1. A ```.cpp``` file is reconstructed with all previous ```global``` and ```vars``` sections (in the appropriate order) and then the newly submitted sections are also appended (including ```once``` sections). 
-2. The source file is compiled as a plugin shared object (```.dll```) and links against the executable (more on that later)
+1. A ```.cpp``` file is reconstructed with all previous ```global``` and ```vars``` sections (in the appropriate order) and then the newly submitted sections are also appended (including ```once``` sections) in their submission order. 
+2. The ```.cpp``` file is compiled as a shared object (```.dll```) and links against the executable (more on that later)
 3. The plugin is then copied with a different name depending on which compilation this is (so we would end up with ```plugin_5.dll``` if we have previously submitted code for compilation 4 times)
 4. The plugin is loaded by the host application and all globals defined in the ```.cpp``` file are initialized from top to bottom
 
@@ -117,6 +117,10 @@ The parser for ```vars``` sections is nothing special (it's not a [recursive des
 
 ## Restrictions
 
+There are 2 sources of limitations for [RCRL](https://github.com/onqtam/rcrl):
+- the parser for the ```vars``` sections is imperfect
+- the method itself (shared objects, dynamic allocation of variables, etc.)
+
 Let's see what C++ constructs/usages are unsupported. In ```vars``` sections:
 
 - nothing else should go here except for variable definitions
@@ -167,7 +171,7 @@ Currently there are a few preprocessor identifiers setup from CMake for the [RCR
 - ```RCRL_EXTENSION``` - the platform-specific shared object extension (```.dll``` for Windows, ```.so``` for Linux, ```.dylib``` for MacOS)
 - ```RCRL_CONFIG``` - only for multi-config IDEs like Visual Studio and XCode - the identifier represents the current configuration (Debug, Release, etc.)
 
-The plugin needs to link to the executable so it can interact with the host application through the API with exported symbols. In CMake executable targets cannot be linked against by default but this can be enabled by setting the ```ENABLE_EXPORTS``` target property to ```ON``` of the executable.
+The plugin needs to link to the executable so it can interact with the host application through the API with exported symbols. It also needs to link for the 2 functions exported by the [RCRL](https://github.com/onqtam/rcrl) engine for ```vars``` sections (```rcrl_get_persistence()``` and ```rcrl_add_deleter()```). In CMake executable targets cannot be linked against by default but this can be enabled by setting the ```ENABLE_EXPORTS``` target property to ```ON``` of the executable.
 
 Actually the [RCRL](https://github.com/onqtam/rcrl) engine can reside also in some shared object and it is possible that the important parts of the host application API are implemented in other shared objects and not in the executable - in which case linking to it would be unnecessary (but still linking to the appropriate modules will be).
 
@@ -176,16 +180,17 @@ The entire "API" of [RCRL](https://github.com/onqtam/rcrl) is just a few functio
 ```c++
 void cleanup_plugins();
 bool submit_code(std::string code, Mode default_mode, bool* used_default_mode = 0);
-std::string get_new_compiler_output();
 bool is_compiling();
 bool try_get_exit_status_from_compile(int& exitcode);
+std::string get_new_compiler_output();
 std::string copy_and_load_new_plugin(bool redirect_stdout = false);
 ```
 
 Some ideas about the integration of the [RCRL](https://github.com/onqtam/rcrl) engine:
-- the editor may be separate from the host application - perhaps vim or whatever you'd like (so you can also have auto completion and whatever) - it doesn't have to be integrated into the host application
+- the code editor may be separate from the host application - perhaps vim or whatever you'd like (so you can also have auto completion and whatever) - it doesn't have to be integrated into the host application
 - the entire [RCRL](https://github.com/onqtam/rcrl) engine can be also outside of the host application - there should only be a way for the host application to be notified that a new plugin needs to be loaded (can be even done with a filesystem watcher)
 - for performance: try to avoid linking the plugin to static libraries as build times will increase and global state in them might lead to problems
+- for easy interaction with the host application most symbols should be exported - on Unix platforms all are exported by default from shared objects and linkable executables (unless built with ```-fvisibility=hidden```) but on Windows the opposite is default - so unless everything is annotated with [```__declspec(dllexport)```](https://msdn.microsoft.com/en-us/library/a90k134d.aspx) properly [this target property](https://cmake.org/cmake/help/latest/prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS.html) can be used in CMake to have everything exported by default (or [hacked](https://stackoverflow.com/questions/225432/export-all-symbols-when-creating-a-dll) for not CMake)
 
 ## Room for improvement
 
@@ -215,7 +220,7 @@ Some ideas about the integration of the [RCRL](https://github.com/onqtam/rcrl) e
     
     What we lose by eliminating scripting is:
     - the ability to update clients remotely without modifying executables
-    - game designers can no longer tinker with the logic in something easier than C++ - but in many studios this is the case anyway
+    - game designers can no longer tinker in something easier than C++ - but in many studios this is the case anyway (or perhaps they can - with something like [Unreal's Blueprints](https://docs.unrealengine.com/latest/INT/Engine/Blueprints/) - later compiled to C++)
     
     What we gain from eliminating scripting is:
     - the (imperfect) binding layer between C++ and the scripting is gone
