@@ -14,10 +14,9 @@ For C++ there is the [cling](https://github.com/root-project/cling) project deve
 
 Out of frustration with the underdeveloped bindings with the scripting language used at a past job I came up with an idea how to make something which behaves almost as an interactive C++ interpreter with very few restrictions - and the [RCRL](https://github.com/onqtam/rcrl) project is a demo application with GUI which demonstrates the technique. Without further ado here is a showcasing video:
 
-// insert youtube video here
+<iframe width="560" height="315" src="https://www.youtube.com/embed/HscxAzFc2QY?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-First the contents of the precompiled header are shown and after that the exported API of the application.
-Then we proceed with printing ```Hello world!``` with the output redirected to the right window, creating a new object and modifying it - all done at runtime. We change the current "section" with comments - that is explained below.
+In the video some basic usage is shown and the scene is interacted with. The build system used is ```Ninja``` for the fastest possible build times times. Also the compilation happens in a background process - submitting code is not blocking - our program continues to run and loads the result when ready.
 
 ## How to use it
 
