@@ -10,7 +10,7 @@ excerpt: "How the cling alternative RCRL works and how to integrate it"
 
 Ever wanted to modify some value or execute some (complex) statement while your C++ program is running just to test something out? Something that cannot be done through the debugger or wouldn't be trivial? Scripting languages have a REPL ([read-eval-print-loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)) - for example frontend web developers use the "javascript console" of the browser to test things out which is available after pressing F12.
 
-For C++ there is the [cling](https://github.com/root-project/cling) project developed by researchers at CERN but it is built on top of LLVM and to say that it isn't trivial to integrate in your application so everything is callable and to have that working on any platform and toolchain would be a huge understatement.
+For C++ there is the [cling](https://github.com/root-project/cling) project developed by researchers at CERN but it is built on top of LLVM and to say that it isn't trivial to integrate in your application in an elegant way so everything is callable and to have that working on any platform and toolchain would be [an understatement](https://github.com/inspector-repl/inspector).
 
 Out of frustration with the underdeveloped bindings with the scripting language used at a past job I came up with an idea how to make something which behaves almost as an interactive C++ interpreter with very few restrictions - and the [RCRL](https://github.com/onqtam/rcrl) project is a demo application with GUI which demonstrates the technique. Without further ado here is a showcasing video:
 
@@ -212,6 +212,8 @@ Some ideas about the integration of the [RCRL](https://github.com/onqtam/rcrl) e
     - a C++ compiler (perhaps the same version used for building them)
     - application API headers with exported symbols
     - application export lib so [RCRL](https://github.com/onqtam/rcrl) can link to it
+    
+    There can be different code "snippets" for applications that modify them.
 
 - I'm betting that an awesome C++ game engine that enables an incredibly fast and flexible workflow can be developed without the need for scripting if 3 things are in place:
     - something like [dynamix](https://github.com/iboB/dynamix) is used for the object model which would allow for very flexible and elegant implementation of the business logic - one of the 2 main reasons people turn to scripting languages
