@@ -140,7 +140,7 @@ And here is a list of general restrictions to keep in mind:
 
 - don't rely on the address of functions - it will be different after each recompilation and reloading
 - don't pass pointers to functions or globals (and persistent globals from a ```vars``` section) to the host app without a way to remove them before doing a cleanup (or you would end up with dangling pointers)
-- don't use the ```static``` keyword - it won't work as expected for local variables in function scope and it doesn't make sense for functions and globals
+- don't use the ```static``` keyword - it won't work as expected for local variables in functions and it doesn't make sense for functions and globals
 - ```decltype()``` of names from ```vars``` sections will return a reference to the type
 - constexpr variables should be in ```global``` sections and not in ```vars``` because it wouldn't make any sense
 - preprocessor use is allowed only in the ```once``` and ```global``` sections - and should be kept to a minimum
