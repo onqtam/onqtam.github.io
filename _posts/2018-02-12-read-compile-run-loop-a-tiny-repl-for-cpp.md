@@ -16,7 +16,7 @@ Ever wanted to modify some value or execute some statement while your C++ progra
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/HscxAzFc2QY?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-In the video some basic usage is shown and the scene is interacted with. The build system used is ```Ninja``` for the fastest possible build times times. Also the compilation happens in a background process - submitting code is not blocking - our program continues to run and loads the result when ready.
+In the video some basic usage is shown and the scene is interacted with. The build system used is ```Ninja``` for the fastest possible build times. Also the compilation happens in a background process - submitting code is not blocking - our program continues to run and loads the result when ready.
 
 ## How to use it
 
