@@ -8,11 +8,11 @@ tags: [programming, hot reloading, cmake, C++, dll, repl]
 excerpt: "How the cling alternative RCRL works and how to integrate it"
 ---
 
-Ever wanted to modify some value or execute some (complex) statement while your C++ program is running just to test something out? Something that cannot be done through the debugger or wouldn't be trivial? Scripting languages have a REPL ([read-eval-print-loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)) - for example frontend web developers use the "javascript console" of the browser to test things out which is available after pressing F12.
+Ever wanted to modify some value or execute some statement while your C++ program is running just to test it out? Something that can't be done through the debugger or isn't trivial? Scripting languages have a REPL ([read-eval-print-loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)) - frontend web developers use the "javascript console" of the browser to test things which is available after pressing F12.
 
-For C++ there is the [cling](https://github.com/root-project/cling) project developed by researchers at CERN but it is built on top of LLVM and to say that it isn't trivial to integrate in your application in an elegant way so everything is callable and to have that working on any platform and toolchain would be [an understatement](https://github.com/inspector-repl/inspector).
+[cling](https://github.com/root-project/cling) is an interactive C++ interpreter (developed at CERN) but since it is built on top of LLVM it [isn't easy at all](https://github.com/inspector-repl/inspector) to integrate in your application in an elegant way so everything is callable and works on any platform and toolchain.
 
-Out of frustration with the underdeveloped bindings with the scripting language used at a past job I came up with an idea how to make something which behaves almost as an interactive C++ interpreter with very few restrictions - and the [RCRL](https://github.com/onqtam/rcrl) project is a demo application with GUI which demonstrates the technique. Without further ado here is a showcasing video:
+[RCRL](https://github.com/onqtam/rcrl) is an interactive C++ compiler in a demo application with GUI which demonstrates the technique. Without further ado here is a showcasing video:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/HscxAzFc2QY?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
@@ -198,7 +198,7 @@ Some ideas about the integration of the [RCRL](https://github.com/onqtam/rcrl) e
 - crash handling - perhaps with structured exceptions under Windows when loading the plugin - in case anything happens while the code is executed
 - compiler error messages - a mapping of lines between the plugin ```.cpp``` file and the submitted code can be made so errors can be highlighted in the original submitted source directly
 - debugging support - with breakpoints and etc. - no idea about this...
-- everything from the integration part of this post
+- build system integration - as mentioned in the previous section
 
 ## Random further thoughts
 
