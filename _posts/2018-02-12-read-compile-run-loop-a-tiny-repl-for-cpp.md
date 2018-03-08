@@ -129,6 +129,7 @@ Let's see what C++ constructs/usages are unsupported. In ```vars``` sections:
 - [*] don't use ```auto*``` - use ```auto``` directly and let it deduce pointer types
 - [*] raw string literals shouldn't be used
 - cannot assign lambdas to auto - should use ```std::function<>``` instead
+- don't use ```goto``` in ```once``` sections...
 - no deleted operator ```new```/```delete``` for types - they should be allocatable
 - temporaries cannot bind to const references (and have their lifetime extended) because pointers are used under the hood - will get a compiler error when trying to get the address of a temporary
 - rvalue references as variables are disallowed by the parser itself - related to the const reference restriction
