@@ -30,7 +30,7 @@ After I got settled in my room the philippine girl contacted me and we agreed to
 
 Then I overslept with 2 hours and woke up at 17:00 and she was already waiting for me so I went out instantly and we met at a temple - she was inside and called me when she saw me - she didn't get a sim card so we had no way of contacting each other unless when she had wifi somewhere. We had 2 amazing pizzas and walked for a few hours checking out temples. Turns out she looked exactly as a Thai and everybody was mistaking her for one - so each time she replied to someone in english they would get confused :D
 
-We also went to a thai massage where we changed our clothes and laid on cussions on the floor with very dim lighting - not on some tables like human meat :D. The massage was very good and we laughet a lot (especially me since I'm very ticklish).
+We also went to a thai massage where we changed our clothes and laid on cussions on the floor with very dim lighting - not on some tables like human meat :D. The massage was very good and we laughed a lot (especially me since I'm very ticklish).
 
 So all I can say about our experience is that we both like the movie ["Before Sunrise"](https://www.imdb.com/title/tt0112471/) (where 2 single people meet on a train spontaneously and have a memorable experience together).
 
@@ -88,7 +88,7 @@ Overslept again - and didn't go to Pai again.. hopefully tomorrow! Work now...
 
 How do I start... The road to Pai was 3 and a half hours with a nice scenery and ... 762 grueling mountainside curves - motion sickness: ON!
 
-When I got there I instantly felt a much different vibe. It was so peaceful and beautiful - full of young people getting on a scooter for the first time in their lives (and many of them crashing after drinking..). After I settled I immediately went to The Sunset Bar which is apparently THE place to go for a mushroom trip. I simply said "Mushrooms" with the biggest smile in the world on my face but the bartender said there weren't any left since its the dry season and there hasn't been enough rain recently. As we will see later that wasn't the case. In the span of a few minutes after I had asked for the special thing came 2 more groups of people asking for the same and getting the same response. Anyway - we found some weed and rolled with it. Then I heard about a music festival the same night a few kilometers out of Pai into the jungle aaand instantly decided I wanted to go. So after having some street food I went to some place where cabs were leaving to the festival - it was 21:00. There I met 2 cool dudes and we chatted a lot for the first 30-40 mins. Turns out we were the first people there and it all looked pretty cool. There were also fires and food stands around. Sooo I got pretty wasted that night - stayed until 4-5 and met a bunch of people, most of which I didn't remember the next day when we bumped throughout the city :D
+When I got there I instantly felt a much different vibe. It was so peaceful and beautiful - full of young people getting on a scooter for the first time in their lives (and many of them crashing after drinking..). After I settled I immediately went to The Sunset Bar which is apparently THE place to go for a mushroom trip. I simply said "Mushrooms" with the biggest smile in the world on my face but the bartender said there weren't any left since its the dry season and there hasn't been enough rain recently. As we will see later that wasn't the case. In the span of a few minutes after I had asked for the special thing came 2 more groups of people asking for the same and getting the same response. Anyway - we found some weed and rolled with it. Talked with a bunch of stoners who had experimented with all kinds of psychedelics and were currently training muai thai in Thailand. Then I heard about a music festival the same night a few kilometers out of Pai into the jungle aaand instantly decided I wanted to go. So after having some street food I went to some place where cabs were leaving to the festival - it was 21:00. There I met 2 cool dudes and we chatted a lot for the first 30-40 mins. Turns out we were the first people there and it all looked pretty cool. There were also fires and food stands around. Sooo I got pretty wasted that night - stayed until 4-5 and met a bunch of people, most of which I didn't remember the next day when we bumped throughout the city :D
 
 ## Day 10
 
@@ -113,6 +113,8 @@ I had decided this would be my last full day at Pai so I had to try those mushro
 ## Day 12
 
 Trip back to Chiang Mai from Pai - I regretted going back so early - should have stayed a few more days - seriously Pai seems to me like paradise - thats either true or I need to explore more.
+
+Oh - how could I forget - when I arrived at Chiang Mai some lady from the bus asked me if I smoked grass (weed). Well... yea? So she gave me some because she was going to the airport and she said a few times that "it was very special"...... Silly me - I thought she meant it was some gift to her and that it had sentimental value... Well I had never smoked anything like that before! So trippy - like it wasn't just weed! Those thai people... :D
 
 ## Day 13
 
