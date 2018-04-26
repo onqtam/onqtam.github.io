@@ -5,7 +5,7 @@ header:
   overlay_image:  "/assets/images/thailand_cover.jpg"
 categories: misc
 tags: [misc, travelling, lifestyle]
-excerpt: "When your plans and expectations don't meet reality"
+excerpt: "Simply put: an experience."
 ---
 
 This post has been written day by day during my 3 week solo trip to Thailand between February 15 and March 9 of 2018. I was a bit reluctant for more than 6 weeks about posting it because of some of the contents but here it is. And the image at the top has nothing in common with my experience :D - islands will have to be next time.
@@ -127,7 +127,7 @@ Still on Bitcoin. Also just learned that I got accepted to speak about [RCRL](ht
 Bitcoin. Also leaving for Bangkok.
 
 At the airport before boarding I met this native guy who was entirely covered with tattoos. He was sitting in front of me and a few times he turned back and looked at me - weird... Then he started a video call with his wife and kid through his phone and I was somehow in the picture and since something was moving I looked that way - and he instantly turned again to me with the biggest smile and gave me his hand - so we shook hands :D
-Later he looked at me again for a bit. After that again... And at one point I decided to try to talk to him - he didn't know any english... not ANY... but really wanted to communicate - so he got his phone out and started showing me pictures of him, his wife, his kid, his brother, his motorbike, his hobbies... We also went through his backpack to see what interesting things he had. After that I decided it was my turn so I whipped my phone out as well and started showing him where I've been. There were a few hand gestures that we both knew (or atleast figured them out) - relating to human connections and what is important. Those were the main focus points of our interaction... I had other experiences with natives who knew 0 english but its all about the vide and the desire to communicate - at first he looked like the biggest thug but turns out he had a tattoo artist friend who painted his entire body for free in the span of a couple of years (not sure how he managed to explained that :D) - but at the end of the day he was a normal friendly dude - so don't be quick to judge... It was weird and memorable.
+Later he looked at me again for a bit. After that again... And at one point I decided to try to talk to him - he didn't know any english... not ANY... but really wanted to communicate - so he got his phone out and started showing me pictures of him, his wife, his kid, his brother, his motorbike, his hobbies... We also went through his backpack to see what interesting things he had. After that I decided it was my turn so I whipped my phone out as well and started showing him where I've been. There were a few hand gestures that we both knew (or atleast figured them out) - relating to human connections and what is important. Those were the main focus points of our interaction... I had other experiences with natives who knew 0 english but its all about the vibe and the desire to communicate - at first he looked like the biggest thug but turns out he had a tattoo artist friend who painted his entire body for free in the span of a couple of years (not sure how he managed to explain that :D) - but at the end of the day he was a normal friendly dude - so don't be quick to judge... It was weird and memorable.
 
 Arrived at Bangkok and instantly hated the place - let me elaborate:
 
@@ -135,13 +135,13 @@ BANGKOK IN A NUTSHELL
 - 10-12 degrees warmer than Chiang Mai - it was 35 at night - and the high humidity didn't help
 - SUPER dirty streets
 - huge city - 10-15 million people
-- horrible traffic - 
+- horrible traffic
 - lots of tourists - and tons of prostitution and ping pong shows... monkeys and pigeons crawling inside... I dont wanna see that done to a pussy
 - nasty polluted air
-- walking around makes you hate yourself - showers and air conditioning were the only thing I kept thinking about throughout the entire stay of 6-7 days
-- local taxi drivers are really annoying - they kept trying to get me into their cabs/tuk-tuks and were very persistent - they engage you in a way so you make eye contact and they come to you - you gotta ignore them totally - saying "NO NO NO" doesn't help - they also have a bunch of scams where they will pressure you i=nto taking a very cheap ride on a specific route where u will end up buying things and they get a cut of the profits - a friend of mine came back from Thailand with a suit (atleast the suit is great ;d)
+- walking around makes you hate yourself - showers and air conditioning were the only thing I kept thinking about during the entire stay of 6-7 days
+- local taxi drivers are really annoying - they kept trying to get me into their cabs/tuk-tuks and were very persistent - they engage you in a way so you make eye contact and they come to you - you gotta ignore them totally - saying "NO NO NO" doesn't help - they also have a bunch of scams where they will pressure you into taking a very cheap ride on a specific route where you will end up buying things and they get a cut of the profits - a friend of mine came back from Thailand with a suit (atleast its great ;d)
 
-So the night I got there me and a bunch of friends who had come from Singapore for 3 nights got all drunk at a tattoo shop and we were catching up until 7 AM.
+So the night I got there me and a bunch of friends who had come from Singapore for 3 nights got all drunk at a tattoo shop and we were catching until 7 AM.
 
 ## Day 16
 
@@ -161,11 +161,11 @@ There were 3 main stages and 1-2 smaller ones. The music ranged between EDM, (Ps
 
 If you've heard the term "runners high" - the good euphoric feeling people get after running - well I got that from dancing and it was non-stop. I was pretty close to overheating a few times and each time I just went to the side to gulp down a bottle of water and get right back in it. And up until now I didn't know I like hardstyle as well :D - and the shows were pretty cool - with fire and what not being hurdled from the stages.
 
-At 22:00+ the festival was packed with people - it was amazing... literally the whole place was full... and there were also atleast 50-100 military personel. I think there were very little drugs in this festival which was cool - people were enjoying the music for what it is - fuck our pill and white powder electronic music culture where parties start at 01:00 AM or later...
+At 22:00+ the festival was packed with people - it was amazing... literally the whole place was full... and there were also atleast 50-100 military personnel. I think there were very little drugs in this festival which was cool - people were enjoying the music for what it is - fuck our pill and white powder electronic music culture where parties start at 01:00 AM or later...
 
 I think it was supposed to close at 1 or 2 AM but the police shut it down at 00:00 for some reason... (not paid enough to the right people - duuh ;d)
 
-I'm now officially hooked on such festivals and 2018 will be an interesting year : )))
+I'm now officially hooked on such festivals and 2018 will be interesting : )))
 
 ## Day 17
 
@@ -179,12 +179,13 @@ Friends left. Fooled around.
 
 ## Day 19
 
-Went to a modern art museum with a friend of mine who had come to bkk for a teambuilding of his company. We both had a nice experience of the traffic in Bangkok. Did I mention how much it sucks in this town? I don't care that there are some cool places to check out here and there - if:
+Went to a modern art museum with a friend of mine who had come to bkk for a teambuilding of his company. We both had a nice experience of the traffic in Bangkok. Did I mention how much it sucks in this town? I don't care that there are some cool places to check out here and there because:
 - you waste so much time of your life in traffic
 - the air is so polluted
 - walking around is not viable (either because of distances, lack of infrastructure (sidewalks, crosswalks, etc) or gruelling heat)
 - there is very little vegetation and almost everything is made of concrete
-then that city is shit and not worth living in!!!
+
+that city is shit and not worth living in!!!
 
 ## Day 20
 
@@ -194,7 +195,7 @@ Man that startup is full of talented and smart people... I chatted with a few of
 
 ## Day 21
 
-I experienced the worse flight scheduling in my life (entirely my fault) - I spent a total of 20 hours waiting at airports between 3 flights... (so with the flights it was a trip of 32+ hours) - the same as my saga in 2015 when I went to Morocco... Doha kinda feels like a second home to me ;d
+I experienced the worse flight scheduling in my life (entirely my fault) - I spent a total of 20 hours waiting at airports between 3 flights... (so with the flights it was a trip of 32+ hours) - the same as my saga in 2015 when I went to Morocco... by now Doha kinda feels like a second home to me ;d
 
 ## Conclusions
 
@@ -202,9 +203,9 @@ I experienced the worse flight scheduling in my life (entirely my fault) - I spe
 - Don't be ultra cheap with places you are staying at...
 - I shouldn't have come with a laptop...
 - Festivals are epic.
-- I should have spent WAY more time outside of the cities and into the nature.
+- I should have spent WAY more time outside of cities and into the nature.
 - My regime completely fell apart and I stopped exercising... Couldn't work properly either... and I gained 3-4 kg of weight :D food is awesome...
-- Don't come to Bangkok for more than 2-3 days..... I personally don't want to come here ever again.
+- Don't come to Bangkok for more than 2-3 days..... I personally don't want to go there ever again.
 - I wasted quite a bit of time because I was moody and hesitant to dive into new adventures non-stop but overall I had plenty of time to think about stuff in my life. I'd say I'm ready and eager to get back to the grind... and then come back here again :D
 - Solo travel definitely is a thing but maybe I'm a bit more on the introverted side - many times I had to be pushed by something/someone just to take action - next time I'm going with friends - definitely.
 - I dont think I'll go somewhere for an extended period of time like this alone any time soon - my conclusion is the same as that from the movie ["Into the Wild (2007)"](http://www.imdb.com/title/tt0758758/) - "HAPPINESS ONLY REAL WHEN SHARED" (even though my experiences and those of the main character in the movie cannot be compared...)
