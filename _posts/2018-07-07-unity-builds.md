@@ -33,10 +33,10 @@ A unity build is when a bunch of source files are ```#include```'d into a single
 Also known as: SCU (single compilation unit), amalgamated or jumbo.
 
 The main benefit is lower build times (compile + link) because:
-- commonly included headers get parsed/compiled only once
-- less reinstantiation of the same templates: like ```std::vector<int>```
-- less work for the linker (for example not having to remove N-1 copies of the same weak symbol - an inline function defined in a header and included in N source files)
-- less compiler invocations
+- Commonly included headers get parsed/compiled only once.
+- Less reinstantiation of the same templates: like ```std::vector<int>```.
+- Less work for the linker (for example not having to remove N-1 copies of the same weak symbol - an inline function defined in a header and included in N source files).
+- less compiler invocations.
 
 Note that we don't have to include all sources in one unity file - as an example: 80 source files can be split in 8 unity files with 10 of the original sources included in each of them and then they can be built in parallel on 8 cores.
 
@@ -162,7 +162,7 @@ It is desirable to have control on:
 
 Unity builds are used in Ubisoft for almost 14 years! Also [WebKit](https://blogs.gnome.org/mcatanzaro/2018/02/17/on-compiling-webkit-now-twice-as-fast/)!
 
-There are also efforts by people who build chrome often (and have gotten very good results - parts of it get built in 30% of the original time) to bring native support for unity builds into clang to minimize the code changes needed for successful unity builds (gives unique names to objects with internal linkage (static or in anonymous namespaces), undefines macros between source files, etc.):
+There are also efforts by people who build chrome often (and have gotten very good results - parts of it get built in 30% of the original time) to bring native support for unity builds into clang to minimize the code changes needed for the technique (gives unique names to objects with internal linkage (static or in anonymous namespaces), undefines macros between source files, etc.):
 - [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057579.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057579.html)
 - [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057597.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057597.html)
 - [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057604.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057604.html)
