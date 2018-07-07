@@ -160,7 +160,7 @@ It is desirable to have control on:
 
 ## Projects using this technique
 
-Unity builds are used in Ubisoft for almost 14 years! Also [WebKit](https://blogs.gnome.org/mcatanzaro/2018/02/17/on-compiling-webkit-now-twice-as-fast/)!
+Unity builds are used in Ubisoft for almost 14 years! Also [WebKit](https://blogs.gnome.org/mcatanzaro/2018/02/17/on-compiling-webkit-now-twice-as-fast/)! And Unreal...
 
 There are also efforts by people who build chrome often (and have gotten very good results - parts of it get built in 30% of the original time) to bring native support for unity builds into clang to minimize the code changes needed for the technique (gives unique names to objects with internal linkage (static or in anonymous namespaces), undefines macros between source files, etc.):
 - [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057579.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057579.html)
