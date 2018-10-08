@@ -84,7 +84,7 @@ analytics:
 author:
   name             : "Viktor Kirilov"
   avatar           : "/assets/images/me.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "A C++ developer set out to build a game studio. <br /> I speak for myself."
+  bio              : "Mostly C++ in the past, no longer defined as only a coder"
   location         : "Sofia, Bulgaria"
   email            : vik.kirilov@gmail.com
   uri              :
