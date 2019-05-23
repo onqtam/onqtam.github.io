@@ -151,6 +151,7 @@ We can manually maintain a set of unity source files - or automate that:
 - [FASTBuild](http://www.fastbuild.org/docs/functions/unity.html)
 - [Meson](http://mesonbuild.com/Unity-builds.html#unity-builds)
 - [waf](https://gitlab.com/ita1024/waf/blob/master/waflib/extras/unity.py)
+- [qmake](https://github.com/nmoreaud/qmake-unity)
 - [Visual Studio Native Support](https://blogs.msdn.microsoft.com/vcblog/2018/07/02/support-for-unity-jumbo-files-in-visual-studio-2017-15-8-experimental/)
 - [Visual Studio Plugin](https://marketplace.visualstudio.com/items?itemName=Trass3r.RudeBuild)
 
