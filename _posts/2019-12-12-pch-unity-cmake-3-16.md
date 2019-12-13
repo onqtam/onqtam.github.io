@@ -5,166 +5,178 @@ header:
   overlay_image:  "/assets/images/warp_speed.png"
 categories: programming
 tags: [programming, C++, compile times, build systems, cmake]
-excerpt: "Here is what you need to know to apply these techniques"
+excerpt: "Here is everything you need to know about these techniques"
 ---
 
-A unity build can cut down build times dramatically and is HIGHLY underrated and easily dismissed by many senior software engineers (just like precompiled headers). In this post we will go over what it is, all its pros and cons, and why a "dirty hack" might be worth it if it speeds up your builds by at least a factor of 2 or perhaps even in the double-digits.
+Modules are coming in C++20 but it will take a while before they are widely adopted and supported byt tooling - what can we do right now to speed up our builds? I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them about these 2 techniques in a weirdly-tree-like-structured way:
 
-## Why care about build times in the first place
+## Precompiled headers
 
-Well... time is money! Let's do the math: assuming an annual salary of 80k $ - waiting for 30 minutes extra a day for builds is 1/16 of the time of a developer ===> 5k $ per year. 200 such employees and we reach 1 million $ annually. But employees bring more value to the company than what they get as a salary (usually atleast x3 - if the company is adequate) - so the costs to the employer are actually bigger.
+- the idea is to "precompile" a bunch of common header files
+    - "precompile" means that the compiler will parse the C++ headers and save its intermediate representation (IR) into a file
+        - then when compiling sources that IR will be prepended to them - as if the headers were included
+            - whatever is in the PCH is the first thing each translation unit sees
+    - easy to integrate - doesn't require any C++ code changes
+    - ~20-30% speedup on UNIX (can be up to 50%+ with MSVC on Windows)
+    - recommended for targets with at least 10 .cpp files (PCH takes space & time to compile)
+- what to put in a PCH
+    - put mostly STL & third-party libs like boost (should be used in at least ~30% of the .cpp files)
+    - some project-specific headers (at least 30% use) which change rarely
+        - for example if you have common utility headers for logging, or a connection/socket or whatever...
+        - which change rarely !!!
+    - each time any header which ends up in the PCH is changed - the entire PCH is recompiled along with the entire target which includes it
+    - careful not to put too much into a PCH - once it reaches ~150-200MB you might start hitting diminishing returns because of the huge IR dump you force on each translation unit
+    - how to determine which are the most commonly used header files
+        - option 1: do searches in the codebase/target - ```<algorithm>```, ```<vector>```, ```<boost/asio.hpp>```, etc.
+            - note that some header might be included only in a few other header files, but if those headers go everywhere, then the other header gets included almost everywhere as well - transitively
+        - option 2: - use software to visualize includes & dependencies
+            - https://www.sourcetrail.com/
+            - https://slides.com/onqtam/faster_builds#/22
+- how to use
+    - https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html
+    - target_precompile_headers(<my_target> PRIVATE my_pch.h)
+    - the PCH will be included automatically - you don't have to #include it in every .cpp file
+        - adding a PCH to a target doesn't require that you remove the headers in it from all .cpp files - the C preprocessor is fast
+    - it's easiest if you have 1 header which includes the common headers - and you precompile that one
+        - example: https://github.com/onqtam/game/blob/master/src/precompiled.h
+        - you could have per-project precompiled header files
+            - or you could reuse a PCH from one CMake target in another
+                - https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html#reusing-precompile-headers
+                - remember that each PCH takes around ~50-200MB on the HDD and takes some time to compile... reuse might be good
+    - actually the PUBLIC thing instead of PRIVATE is there because the PCH support in CMake isn't designed for you to maintain the header on your own, but it is intended that you give each project all the headers which should be precompiled through CMake, and then it will generate a single header where it will include all those headers and precompile those. That way you could have public and private headers, but I'm more used to maintaining the precompiled header on my own as C++ source code instead of in CMake.
+- some random final notes:
+    - if before introducing a PCH some header was being included in 30% of the .cpp files (or other header files), after adding it to the PCH it become available everywhere. So in time more .cpp files and other header files might have started depending on it without you even noticing - the code might not build without the PCH anymore.
+        - the code needs to be tested if it compiles successfully without a PCH
+            - easy if every .cpp includes the appropriate precompiled header for it anyway
+                - problematic if the same .cpp file is used in 2 or more CMake targets with different PCHs
+                    - move that .cpp into a static lib, compile it only once and link against that!
+    - if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang
+        - those tools might not work because they will try to read the .gch file produced by GCC
+        - there is a bug report for that (along with a patch): https://bugs.llvm.org/show_bug.cgi?id=41579
 
-![](/assets/images/compiling.png)
+## Unity builds
 
-Now let's consider the facts that waiting for long builds discourages refactoring and experimentation and leads to mental context switches + distractions which are always expensive - so we reach the only possible conclusion: **any time spent reducing build times is worthwhile!**
+- a detailed blog post about unity builds and why they make builds faster: http://onqtam.com/programming/2018-07-07-unity-builds/
+- the idea is to cram the .cpp files of a CMake target into a few .cpp files which include the original .cpp files
+    - up to 7-8 times faster builds (usually x3 or x4) in addition to the PCH gains
+    - the reasons for the speedup are:
+        - common headers from the different .cpp files end up being included and parsed fewer times
+            - this is beneficial even when using precompiled headers
+        - common template instantiations with the same types from different .cpp files (```vector<int>```) end up being done in fewer places
+        - the linker has to stitch much fewer ```.obj``` files in the end
+            - also there are a lot less "weak" symbols to remove
+                - "inline"/template functions from headers end up in every ```.obj``` => the linker has to remove all duplicates and leave just 1
+        - the compiler is invoked less times and less ```.obj``` files are written to disk
+            - even incremental builds (changing a single .cpp) will probably be faster (even though you compile more .cpp files together)
+    - example: a project of 200 .cpp files might be divided into 16 unity .cpp files each including about 13 .cpp files
+        - that way you will have 16 .cpp files to build in parallel and only 16 ```.obj``` files to link in the end
+    - uncovers ODR violations - https://stackoverflow.com/questions/31722473
+    - runtime (final binary) might be faster (free LTO!) - because the compiler sees more symbols from different .cpp files together
+- how to use
+    - CMake 3.16 adds the ```UNITY_BUILD``` target property
+        - make sure to read this page: https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html
+        - you can set this property per target explicitly
+            - set_target_properties(<target> PROPERTIES UNITY_BUILD ON)
+            - or set it globally: "set(CMAKE_UNITY_BUILD ON)" (or call CMake with "-DCMAKE_UNITY_BUILD=ON")
+                - and then you can explicitly disable it for just a few targets by setting their property
+    - the order in which the .cpp files go into the batches depends on the order they were given to a target in add_library/add_executable
+    - if for some reason 2 .cpp files are hard to compile together they can be separated in different batches
+        - or one of them can be excluded by setting the SKIP_UNITY_BUILD_INCLUSION property on it
+            - https://cmake.org/cmake/help/latest/prop_sf/SKIP_UNITY_BUILD_INCLUSION.html
+    - about 10-20 .cpp files per unity is the most optimal
+        - this is controlled through the UNITY_BUILD_BATCH_SIZE target property - default is 8
+            - https://cmake.org/cmake/help/v3.16/prop_tgt/UNITY_BUILD_BATCH_SIZE.html
+            - can be set globally with CMAKE_UNITY_BUILD_BATCH_SIZE
+        - don't worry if a target has few .cpp files - if it has >1 .cpp file it would benefit from a unity build
+            - also a good build system such as ninja will schedule .obj files from different targets to be compiled in parallel
+    - the unity .cxx files will go in the build directory - you don't have to maintain them or add them to source control
+- initial problems when trying to compile a project as unity
+    - some headers will be missing include guards or "#pragma once"
+    - there will be static globals (or in anonymous namespaces) in different .cpp files with identical names - those would clash
+        - either rename them or put such globals into an additional namespace - perhaps with the name of the file: GRAPH_VISITOR_CPP
+            - putting static symbols inside of a named namespace keeps their linkage to "internal" (same with nesting anonymous namespaces into named ones)
+    - there will be symbol ambiguities
+        - mostly because some .cpp file uses a namespace, and then some other .cpp file which ends up in the same unity .cpp cannot compile
+        - either remove the "using namespace ..." stuff or fully qualify symbols where necessary (can use "::" to mean "from global scope")
+    - some macros might have to be explicitly #undef-ed at the end of the .cpp files where they are defined/used
+        - or rewritten to C++ constructs - macros are $h1t anyway
+    - another more obscure possible problem:
+        - if a static library gets built as a unity build - there are fewer .obj files stitched together
+            - if some other target links to the static library and uses only some symbols - from a few of the original .obj files
+                - it might no longer link because now there are other symbols in the same .obj file where the needed symbols reside
+                    - those other symbols might need some other symbols which are in some other static library
+                    - solution: find what else needs to be linked against - because of this newly dragged dependency
+    - unity build failures are rare after the initial cleanup (and if everyone uses unity builds locally there wouldn't be any)
+    - it took me about 3-4 full days to compile about 2000 .cpp files in 20 different CMake targets to unity in my current company
+        - there was plenty of 10+ year old code
+- recommended way to go about it
+    - I would recommend trying targets 1 by 1 by setting their target property UNITY_BUILD to ON - and not to enable it globally directly
+    - start with low batching - get the project to compile with 4 .cpp files per unity, then increase
+    - if you desire to have 20 .cpp files per batch in the end - go to atleast 40-50, clean the errors and then move back to 20
+        - ==> future problems will be less likely - when a new .cpp file is added somewhere and changes which .cpp files get paired together
+    - unity builds should eventually become the default mode for building for all developers
+        - there should be a separate CI build that checks that the project still compiles not as unity - checks for missing includes.
+- if you are using CMAKE_EXPORT_COMPILE_COMMANDS=ON you get a file called "compile_commands.json" generated by CMake in the build folder
+    - that file contains compile commands for each translation unit - with all definitions and includes
+    - that file is used by tools such as ccls/cquery/clangd - language servers which are usually integrated with editors and IDEs such as vim/emacs/VSCode for intellisense (code completion, refactoring and syntax highlighting)
+        - when using unity builds the build information there will not contain compile commands for the specific .cpp files but only for the actual unity .cxx files - tools such as ccls and cquery might stop working correctly
+            - in my current company we have a script which calls cmake - this is what we do:
+                - call CMake once with disabled unity builds + to generate the compile_commands.json file
+                - call CMake again with unity builds enabled + no generation for that file
+    - this will probably get fixed eventually: https://gitlab.kitware.com/cmake/cmake/issues/19826
 
-## Introduction - a short summary to unity builds
+## Some other good tips to make builds faster
 
-A unity build is when a bunch of source files are ```#include```'d into a single file which is then compiled:
+- use ninja instead of GNU make
+    - originally developed in Google for building Google Chrome - much better than make
+    - superior scheduler, dependency tracking & change detection - optimal parallelization of building object files and linking targets
+    - CMake can generate ninja build files instead of Makefiles
+        - just pass -G "Ninja" when calling CMake
+        - ninja is a standalone portable binary
+            - should be available as a package "ninja" or "ninja-build" in linux distros
+            - or download it from the latest release: https://github.com/ninja-build/ninja/releases
+        - to build the code either call "cmake --build <path-to-build-dir>" (instead of "make -j") or just "ninja -C <path-to-build-dir>"
+- change your compilers and linkers
+    - experiment moving from gcc to clang
+    - check if you are using "ld" - the default linker, and if so, switch to "gold" or even "lld" (part of the LLVM project)
+        - "-fuse-ld=gold" if gold is installed on the system
+- use dynamic linking instead of static - at least for internal builds if concerned about runtime performance
+    - https://slides.com/onqtam/faster_builds#/62
+    - you could experiment adding "-fvisibility-inlines-hidden" to the compiler flags
+        - documentation: https://gcc.gnu.org/wiki/Visibility
+- use doctest for unit tests - https://github.com/onqtam/doctest/ - [benchmarks](https://github.com/onqtam/doctest/blob/master/doc/markdown/benchmarks.md)
+    - migrating from googletest: https://github.com/onqtam/doctest/blob/master/doc/markdown/faq.md#how-is-doctest-different-from-google-test
+    - migrating from Catch2: https://github.com/onqtam/doctest/blob/master/doc/markdown/faq.md#how-is-doctest-different-from-catch
+- include-what-you-use - https://github.com/include-what-you-use/include-what-you-use
+    - based on clang - parses the source code 100% correctly and helps identify unnecessary headers and helps identify where a simple forward declaration would do
+- bloaty - https://github.com/google/bloaty
+    - Bloaty McBloatface will show you a size profile of the binary so you can understand what's taking up space inside.
+    - great to identify where code bloat is coming from and which symbols take the most space - which are the offending templates?
+- look into "extern template" from C++11
+    - tells the compiler to not instantiate a specific template (for example ```std::vector<int>```) in the current translation unit
+    - https://slides.com/onqtam/faster_builds#/41
+    - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
+    - diagnosing which templates are a problem is easiest with:
+        - bloaty
+        - https://slides.com/onqtam/faster_builds#/45
+        - https://slides.com/onqtam/faster_builds#/48
+- caching & distributed builds
+    - https://slides.com/onqtam/faster_builds#/67 
+    - https://slides.com/onqtam/faster_builds#/70   
+- inspecting the physical structure of projects - targets & dependencies
+    - https://www.sourcetrail.com/
+    - "cmake --graphviz=<file>"
+        - https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html
+        - http://www.graphviz.org/
+    - https://slides.com/onqtam/faster_builds#/75
+    - https://slides.com/onqtam/faster_builds#/22
+- PIMPL, disabling inlining for some functions, rewriting templates... - too much effort and little gain - do this as a last resort.
+- you could look into using RAM disks (filesystem in your RAM) for builds - every OS supports those. Put the compiler and the temp directory there.
 
-```c++
-// unity_file.cpp
+## Final thoughts
 
-#include "widget.cpp"
-#include "gui.cpp"
-#include "test.cpp"
-```
+If it was up to me most of the techniques listed here would be put to use - from top to bottom - they are sorted based on impact and cost to implement. Slow builds don't just waste time - they also break the 'flow' (context switching) and discourage refactoring and experimentation - how do you put a price on that?
 
-Also known as: SCU (single compilation unit), amalgamated or jumbo.
-
-The main benefit is lower build times (compile + link) because:
-- Commonly included headers get parsed/compiled only once.
-- Less reinstantiation of the same templates: like ```std::vector<int>```.
-- Less work for the linker (for example not having to remove N-1 copies of the same weak symbol - an inline function defined in a header and included in N source files).
-- less compiler invocations.
-
-Note that we don't have to include all sources in one unity file - as an example: 80 source files can be split in 8 unity files with 10 of the original sources included in each of them and then they can be built in parallel on 8 cores.
-
-## Why redundant header parsing/compilation is slow:
-
-Here is what happens after including a single header with 2 popular compilers and running only the preprocessor (in terms of file size and lines of code):
-
-| header |GCC 7 size | GCC 7 loc | MSVC 2017 size | MSVC 2017 loc |
-|------------|--------|----------|--------|---------|
-| cstdlib    |  43 kb |   1k loc | 158 kb | 11k loc |
-| cstdio     |  60 kb |   1k loc | 251 kb | 12k loc |
-| iosfwd     |  80 kb | 1.7k loc | 482 kb | 23k loc |
-| chrono     | 180 kb |   6k loc | 700 kb | 31k loc |
-| variant    | 282 kb |  10k loc | 1.1 mb | 43k loc |
-| vector     | 320 kb |  13k loc | 950 kb | 45k loc |
-| algorithm  | 446 kb |  16k loc | 880 kb | 41k loc |
-| string     | 500 kb |  17k loc | 1.1 mb | 52k loc |
-| optional   | 660 kb |  22k loc | 967 kb | 37k loc |
-| tuple      | 700 kb |  23k loc | 857 kb | 33k loc |
-| map        | 700 kb |  24k loc | 980 kb | 46k loc |
-| iostream   | 750 kb |  26k loc | 1.1 mb | 52k loc |
-| memory     | 760 kb |  26k loc | 857 kb | 40k loc |
-| random     | 1.1 mb |  37k loc | 1.4 mb | 67k loc |
-| functional | 1.2 mb |  42k loc | 1.4 mb | 58k loc |
-| **all of them** | **2.2 mb** | **80k loc** | **2.1 mb** | **88k loc** |
-
-And here are some (common) headers from Boost (version 1.66):
-
-| header |GCC 7 size | GCC 7 loc | MSVC 2017 size | MSVC 2017 loc |
-|------------|--------|----------|--------|----------|
-| hana       | 857 kb |  24k loc | 1.5 mb |  69k loc |
-| optional   | 1.6 mb |  50k loc | 2.2 mb |  90k loc |
-| variant    |   2 mb |  65k loc | 2.5 mb | 124k loc |
-| function   |   2 mb |  68k loc | 2.6 mb | 118k loc |
-| format     | 2.3 mb |  75k loc | 3.2 mb | 158k loc |
-| signals2   | 3.7 mb | 120k loc | 4.7 mb | 250k loc |
-| thread     | 5.8 mb | 188k loc | 4.8 mb | 304k loc |
-| asio       | 5.9 mb | 194k loc | 7.6 mb | 513k loc |
-| wave       | 6.5 mb | 213k loc | 6.7 mb | 454k loc |
-| spirit     | 6.6 mb | 207k loc | 7.8 mb | 563k loc |
-| geometry   | 9.6 mb | 295k loc | 9.8 mb | 448k loc |
-| **all of them** | **18 mb** | **560k loc** | **16 mb** | **975k loc** |
-
-The point here is not to discredit Boost - this is an issue with the language itself when building zero-cost abstractions.
-
-So if we have a few 5 kb source files with a 100 lines of code in each (because we write modular code) and we include some of these - we can easily get hundreds of thousands of lines of code (reaching megabyte sizes) for the compiler to go through for each source file of our tiny program. If some headers are commonly included in those source files then by employing the unity build technique we will compile the contents of each header just once - and this is where the biggest gains from unity builds come from.
-
-A common misconception is that unity builds offer gains because of the reduced disk I/O - after the first time a header is read it is cached by the filesystem (they cache very aggressively since a cache miss is a huge hit).
-
-## The PROS of unity builds:
-
-- Up to 90+% faster (depends on modularity - stitching a few 10k loc files together wouldn't be much beneficial) - the best gains are with short sources and lots of (heavy) includes.
-- Same as [LTO](https://en.wikipedia.org/wiki/Interprocedural_optimization) (link-time optimizations - also LTCG) but even faster than normal full builds! Usually LTO builds take tremendously more time (but there are great improvements in that area such as clang's [ThinLTO](https://clang.llvm.org/docs/ThinLTO.html)).
-- [ODR](https://en.cppreference.com/w/cpp/language/definition#One_Definition_Rule) (One Definition Rule) violations get caught (see [this](https://stackoverflow.com/questions/31722473/is-there-a-way-to-detect-inline-function-odr-violations)) - there are still no reliable tools for that. Example - the following code will result in a runtime bug since the linker will randomly remove one of the 2 methods and use the other one since they seem to be identical:
-    ```c++
-// a.cpp
-struct Foo {
-    int method() { return 42; } // implicitly inline
-};
-    ```
-    ```c++
-// b.cpp
-struct Foo {
-    int method() { return 666; } // implicitly inline
-};
-    ```
-- Enforces code hygiene such as include guards (or ```#pragma once```) in headers
-
-## The CONS:
-
-- Not all valid C++ continues to compile:
-    - Clashes of symbols with identical names and internal linkage (in anonymous namespaces or static)
-    ```c++
-// a.cpp
-namespace {
-    int local;
-}
-    ```
-    ```c++
-// b.cpp
-static int local;
-    ```
-    - Overload ambiguities (also non-explicit 1 argument constructor...?)
-    - Using namespaces in sources can be a problem
-    - Leaked preprocessor identifiers after some source which defines them
-- Might slow down some workflows:
-    - Minimal rebuilds - but if a source file can be excluded from the unity ones for faster iteration it should all be OK
-    - Might interfere with parallel compilation - but that can be tuned by better grouping of the sources to avoid "long poles" in compilation
-- Might need a lot of RAM depending on how many sources you combine.
-- One scary caveat is a miscompilation - when the program compiles successfully but in a wrong way (perhaps a better matching overload got chosen somewhere - or something to do with the preprocessor). Example:
-    ```c++
-// a.cpp
-struct MyStruct {
-    MyStruct(int arg) : data(arg) {}
-    int data;
-};
-int func(MyStruct arg) { return arg.data; }
-int main() { return func(42); }
-    ```
-    ```c++
-// b.cpp
-int func(int arg) { return arg * 2; }
-    ```
-    If ```b.cpp``` ends up before ```a.cpp``` then we would get 84 instead of 42.
-    However I haven't seen this mentioned anywhere - people don't run that much into it. Also [good tests](https://github.com/onqtam/doctest) will definitely help.
-
-## How to maintain
-
-We can manually maintain a set of unity source files - or automate that:
-
-- [CMake](https://en.wikipedia.org/wiki/CMake): either [cotire](https://github.com/sakra/cotire) or [this](http://kecsapblog.blogspot.com/2016/03/unity-build-macro-for-cmake.html)
-- [FASTBuild](http://www.fastbuild.org/docs/functions/unity.html)
-- [Meson](http://mesonbuild.com/Unity-builds.html#unity-builds)
-- [waf](https://gitlab.com/ita1024/waf/blob/master/waflib/extras/unity.py)
-- [qmake](https://github.com/nmoreaud/qmake-unity)
-- [Visual Studio Native Support](https://blogs.msdn.microsoft.com/vcblog/2018/07/02/support-for-unity-jumbo-files-in-visual-studio-2017-15-8-experimental/)
-- [Visual Studio Plugin](https://marketplace.visualstudio.com/items?itemName=Trass3r.RudeBuild)
-
-It is desirable to have control on:
-- how many unity source files there are
-- the order of source files in the unity files
-- the ability to exclude certain files (if problematic or for iterating over them)
-
-## Projects using this technique
-
-Unity builds are used in Ubisoft for almost 14 years! Also [WebKit](https://blogs.gnome.org/mcatanzaro/2018/02/17/on-compiling-webkit-now-twice-as-fast/)! And Unreal...
-
-There are also efforts by people who build chrome often (and have gotten very good results - parts of it get built in 30% of the original time) to bring native support for unity builds into clang to minimize the code changes needed for the technique (gives unique names to objects with internal linkage (static or in anonymous namespaces), undefines macros between source files, etc.):
-- [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057579.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057579.html)
-- [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057597.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057597.html)
-- [http://lists.llvm.org/pipermail/cfe-dev/2018-April/057604.html](http://lists.llvm.org/pipermail/cfe-dev/2018-April/057604.html)
+Most of the things here are based on my "The Hitchhiker's Guide to Faster Builds" talk:
+- slides: https://slides.com/onqtam/faster_builds
+- recording: https://www.youtube.com/watch?v=anbOy47fBYI
