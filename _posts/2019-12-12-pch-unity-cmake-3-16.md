@@ -23,7 +23,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
     - for targets with at least 10 .cpp files (takes space & time to compile)
 - what to put in a PCH
     - STL & third-party libs like boost (used in at least ~30% of the sources)
-    - some project-specific headers (at least 30% use) **which change rarely**
+    - some **rarely changing** project-specific headers (at least 30% use)
         - for example if you have common utilities for logging/etc.
     - each time any header which ends up in the PCH is changed - the entire PCH is recompiled along with the entire target which includes it
     - careful not to put too much into a PCH - once it reaches ~150-200MB you might start hitting diminishing returns
