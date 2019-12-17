@@ -1,14 +1,16 @@
 ---
-title:  "CMake 3.16 added support for precompiled headers and unity builds"
+title:  "CMake 3.16 added support for precompiled headers & unity builds - what you need to know"
 date:   2019-12-12 16:40:34 +0200
 header:
   overlay_image:  "/assets/images/warp_speed.png"
 categories: programming
 tags: [programming, C++, compile times, build systems, cmake]
-excerpt: "Here is everything you need to know about these techniques"
+excerpt: "A weird tree-like guide to applying the techniques"
 ---
 
-Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do right now to speed up our builds? I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them about these 2 techniques in a weirdly-tree-like-structured way:
+Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do right now to speed up our builds?
+
+I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them about these 2 techniques in a weirdly-tree-like-structured way:
 
 ## Precompiled headers
 
@@ -18,16 +20,17 @@ Modules are coming in C++20 but it will take a while before they are widely adop
             - the PCH is the first thing each translation unit sees
     - easy to integrate - doesn't require any C++ code changes
     - ~20-30% speedup on UNIX (can be up to 50%+ with MSVC)
-    - for targets with at least 10 .cpp files (PCH takes space & time to compile)
+    - for targets with at least 10 .cpp files (takes space & time to compile)
 - what to put in a PCH
-    - STL & third-party libs like boost (used in at least ~30% of the .cpp files)
+    - STL & third-party libs like boost (used in at least ~30% of the sources)
     - some project-specific headers (at least 30% use) which change rarely
         - for example if you have common utilities for logging/connections/etc.
         - !!! which change rarely !!!
     - each time any header which ends up in the PCH is changed - the entire PCH is recompiled along with the entire target which includes it
     - careful not to put too much into a PCH - once it reaches ~150-200MB you might start hitting diminishing returns
     - how to determine which are the most commonly used header files
-        - option 1: do searches in the codebase/target - ```<algorithm>```, ```<vector>```, ```<boost/asio.hpp>```, etc.
+        - option 1: do a few searches in the codebase/target
+            - ```<algorithm>```, ```<vector>```, ```<boost/asio.hpp>```, etc.
             - note that some header might be included only in a few other header files, but if those headers go everywhere, then the other header gets included almost everywhere as well
         - option 2: - [use software to visualize includes & dependencies](https://slides.com/onqtam/faster_builds#/22)
 - how to use
@@ -45,7 +48,7 @@ Modules are coming in C++20 but it will take a while before they are widely adop
             - make every .cpp explicitly include the precompiled header
                 - problematic if the same .cpp file is used in 2 or more CMake targets with different PCHs
                     - move that .cpp into a static lib, compile it only once and link against that!
-    - if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang
+    - if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang:
         - those tools might not work because they will try to read the .gch file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579) (along with a patch)
 
 ## Unity builds
@@ -165,14 +168,14 @@ Modules are coming in C++20 but it will take a while before they are widely adop
     - https://slides.com/onqtam/faster_builds#/75
     - https://slides.com/onqtam/faster_builds#/22
 - PIMPL, disabling inlining for some functions, rewriting templates... - too much effort and little gain - do this as a last resort.
-- you could look into using RAM disks (filesystem in your RAM) for builds - every OS supports those. Put the compiler and the temp directory there.
+- use RAM disks (filesystem in your RAM) for builds - every OS supports those. Put the compiler and the temp & output directories there.
 
 ## Final thoughts
 
 If it was up to me most of the techniques listed here would be put to use - from top to bottom - they are sorted based on impact and cost to implement. Slow builds don't just waste time - they also break the 'flow' (context switching) and discourage refactoring and experimentation - how do you put a price on that?
 
 Most of the things here are based on my "The Hitchhiker's Guide to Faster Builds" talk:
-- slides: https://slides.com/onqtam/faster_builds
-- recording: https://www.youtube.com/watch?v=anbOy47fBYI
+- slides: [https://slides.com/onqtam/faster_builds](https://slides.com/onqtam/faster_builds)
+- recording: [https://www.youtube.com/watch?v=anbOy47fBYI](https://www.youtube.com/watch?v=anbOy47fBYI)
 
 
