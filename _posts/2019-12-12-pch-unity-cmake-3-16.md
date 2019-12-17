@@ -23,9 +23,8 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
     - for targets with at least 10 .cpp files (takes space & time to compile)
 - what to put in a PCH
     - STL & third-party libs like boost (used in at least ~30% of the sources)
-    - some project-specific headers (at least 30% use) which change rarely
-        - for example if you have common utilities for logging/connections/etc.
-        - !!! which change rarely !!!
+    - some project-specific headers (at least 30% use) **which change rarely**
+        - for example if you have common utilities for logging/etc.
     - each time any header which ends up in the PCH is changed - the entire PCH is recompiled along with the entire target which includes it
     - careful not to put too much into a PCH - once it reaches ~150-200MB you might start hitting diminishing returns
     - how to determine which are the most commonly used header files
@@ -37,7 +36,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
     - [```target_precompile_headers(<my_target> PRIVATE my_pch.h)```](https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html)
     - the PCH will be included automatically in every .cpp file
         - adding a PCH to a target doesn't require that you remove the headers in it from all .cpp files - the C preprocessor is fast
-    - easiest if you have 1 header which includes the common ones - [example](https://github.com/onqtam/game/blob/master/src/precompiled.h)
+    - easiest if a single header which includes the common ones - [example](https://github.com/onqtam/game/blob/master/src/precompiled.h)
         - you could have per-project precompiled header files
             - or you could [reuse a PCH from one CMake target in another](https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html#reusing-precompile-headers)
                 - remember that each PCH takes around ~50-200MB and takes some time to compile... reuse is good!
@@ -168,7 +167,9 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
     - https://slides.com/onqtam/faster_builds#/75
     - https://slides.com/onqtam/faster_builds#/22
 - PIMPL, disabling inlining for some functions, rewriting templates... - too much effort and little gain - do this as a last resort.
-- use RAM disks (filesystem in your RAM) for builds - every OS supports those. Put the compiler and the temp & output directories there.
+- on the hardware side
+    - more cores, more RAM...
+    - use RAM disks (filesystem in your RAM) for builds - every OS supports those. Put the compiler and the temp & output directories there.
 
 ## Final thoughts
 
