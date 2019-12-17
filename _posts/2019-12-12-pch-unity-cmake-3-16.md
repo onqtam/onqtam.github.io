@@ -8,51 +8,45 @@ tags: [programming, C++, compile times, build systems, cmake]
 excerpt: "Here is everything you need to know about these techniques"
 ---
 
-Modules are coming in C++20 but it will take a while before they are widely adopted and supported byt tooling - what can we do right now to speed up our builds? I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them about these 2 techniques in a weirdly-tree-like-structured way:
+Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do right now to speed up our builds? I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them about these 2 techniques in a weirdly-tree-like-structured way:
 
 ## Precompiled headers
 
 - the idea is to "precompile" a bunch of common header files
     - "precompile" means that the compiler will parse the C++ headers and save its intermediate representation (IR) into a file
         - then when compiling sources that IR will be prepended to them - as if the headers were included
-            - whatever is in the PCH is the first thing each translation unit sees
+            - the PCH is the first thing each translation unit sees
     - easy to integrate - doesn't require any C++ code changes
-    - ~20-30% speedup on UNIX (can be up to 50%+ with MSVC on Windows)
-    - recommended for targets with at least 10 .cpp files (PCH takes space & time to compile)
+    - ~20-30% speedup on UNIX (can be up to 50%+ with MSVC)
+    - for targets with at least 10 .cpp files (PCH takes space & time to compile)
 - what to put in a PCH
-    - put mostly STL & third-party libs like boost (should be used in at least ~30% of the .cpp files)
+    - STL & third-party libs like boost (used in at least ~30% of the .cpp files)
     - some project-specific headers (at least 30% use) which change rarely
-        - for example if you have common utility headers for logging, or a connection/socket or whatever...
-        - which change rarely !!!
+        - for example if you have common utilities for logging/connections/etc.
+        - !!! which change rarely !!!
     - each time any header which ends up in the PCH is changed - the entire PCH is recompiled along with the entire target which includes it
-    - careful not to put too much into a PCH - once it reaches ~150-200MB you might start hitting diminishing returns because of the huge IR dump you force on each translation unit
+    - careful not to put too much into a PCH - once it reaches ~150-200MB you might start hitting diminishing returns
     - how to determine which are the most commonly used header files
         - option 1: do searches in the codebase/target - ```<algorithm>```, ```<vector>```, ```<boost/asio.hpp>```, etc.
-            - note that some header might be included only in a few other header files, but if those headers go everywhere, then the other header gets included almost everywhere as well - transitively
-        - option 2: - use software to visualize includes & dependencies
-            - https://www.sourcetrail.com/
-            - https://slides.com/onqtam/faster_builds#/22
+            - note that some header might be included only in a few other header files, but if those headers go everywhere, then the other header gets included almost everywhere as well
+        - option 2: - [use software to visualize includes & dependencies](https://slides.com/onqtam/faster_builds#/22)
 - how to use
-    - https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html
-    - target_precompile_headers(<my_target> PRIVATE my_pch.h)
-    - the PCH will be included automatically - you don't have to #include it in every .cpp file
+    - [```target_precompile_headers(<my_target> PRIVATE my_pch.h)```](https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html)
+    - the PCH will be included automatically in every .cpp file
         - adding a PCH to a target doesn't require that you remove the headers in it from all .cpp files - the C preprocessor is fast
-    - it's easiest if you have 1 header which includes the common headers - and you precompile that one
-        - example: https://github.com/onqtam/game/blob/master/src/precompiled.h
+    - easiest if you have 1 header which includes the common ones - [example](https://github.com/onqtam/game/blob/master/src/precompiled.h)
         - you could have per-project precompiled header files
-            - or you could reuse a PCH from one CMake target in another
-                - https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html#reusing-precompile-headers
-                - remember that each PCH takes around ~50-200MB on the HDD and takes some time to compile... reuse might be good
-    - actually the PUBLIC thing instead of PRIVATE is there because the PCH support in CMake isn't designed for you to maintain the header on your own, but it is intended that you give each project all the headers which should be precompiled through CMake, and then it will generate a single header where it will include all those headers and precompile those. That way you could have public and private headers, but I'm more used to maintaining the precompiled header on my own as C++ source code instead of in CMake.
+            - or you could [reuse a PCH from one CMake target in another](https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html#reusing-precompile-headers)
+                - remember that each PCH takes around ~50-200MB and takes some time to compile... reuse is good!
+    - actually the ```PUBLIC``` thing instead of ```PRIVATE``` is there because the PCH support in CMake isn't designed for you to maintain the header on your own, but it is intended that you give each project all the headers which should be precompiled through CMake, and then it will generate a single header where it will include all those headers and precompile those. That way you could have public and private headers, but I'm more used to maintaining the precompiled header on my own as C++ source code instead of in CMake.
 - some random final notes:
-    - if before introducing a PCH some header was being included in 30% of the .cpp files (or other header files), after adding it to the PCH it become available everywhere. So in time more .cpp files and other header files might have started depending on it without you even noticing - the code might not build without the PCH anymore.
-        - the code needs to be tested if it compiles successfully without a PCH
-            - easy if every .cpp includes the appropriate precompiled header for it anyway
+    - if before introducing a PCH some header was being included in 30% of the .cpp files (or other header files), after adding it to the PCH it become available everywhere. So in time more .cpp files and other header files might have started depending on it without you even noticing - the code might not build without the PCH anymore
+        - do you care if it compiles successfully without a PCH?
+            - make every .cpp explicitly include the precompiled header
                 - problematic if the same .cpp file is used in 2 or more CMake targets with different PCHs
                     - move that .cpp into a static lib, compile it only once and link against that!
     - if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang
-        - those tools might not work because they will try to read the .gch file produced by GCC
-        - there is a bug report for that (along with a patch): https://bugs.llvm.org/show_bug.cgi?id=41579
+        - those tools might not work because they will try to read the .gch file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579) (along with a patch)
 
 ## Unity builds
 
@@ -180,3 +174,5 @@ If it was up to me most of the techniques listed here would be put to use - from
 Most of the things here are based on my "The Hitchhiker's Guide to Faster Builds" talk:
 - slides: https://slides.com/onqtam/faster_builds
 - recording: https://www.youtube.com/watch?v=anbOy47fBYI
+
+
