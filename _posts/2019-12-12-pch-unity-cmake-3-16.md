@@ -5,14 +5,14 @@ header:
   overlay_image:  "/assets/images/cmake.png"
 categories: programming
 tags: [programming, C++, compile times, build systems, cmake]
-excerpt: "A weird tree-like guide to applying the techniques"
+excerpt: "A complete guide to applying the techniques"
 ---
 
 Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do right now to speed up our builds?
 
-I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them about these 2 techniques in a weirdly-tree-like-structured way:
+I recently consulted a company on this exact matter - luckily CMake 3.16 was just released and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire) - more than 4k LOC of CMake...). Here is what I told them:
 
-## Precompiled headers (PCH)
+# Precompiled headers (PCH)
 
 ### The idea is to "precompile" a bunch of common header files
 - "precompile" means that the compiler will parse the C++ headers and save its intermediate representation (IR) into a file
@@ -21,6 +21,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
 - easy to integrate - doesn't require any C++ code changes
 - ~20-30% speedup on UNIX (can be up to 50%+ with MSVC)
 - for targets with at least 10 ```.cpp``` files (takes space & time to compile)
+
 ### What to put in a PCH
 - STL & third-party libs like boost (used in at least ~30% of the sources)
 - some **rarely changing** project-specific headers (at least 30% use)
@@ -32,6 +33,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
         - ```<algorithm>```, ```<vector>```, ```<boost/asio.hpp>```, etc.
         - note that some header might be included only in a few other header files, but if those headers go everywhere, then the other header gets included almost everywhere as well
     - option 2: - [use software to visualize includes & dependencies](https://slides.com/onqtam/faster_builds#/22)
+
 ### How to use
 - [```target_precompile_headers(<my_target> PRIVATE my_pch.h)```](https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html)
 - the PCH will be included automatically in every ```.cpp``` file
@@ -41,6 +43,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
         - or you could [reuse a PCH from one CMake target in another](https://cmake.org/cmake/help/v3.16/command/target_precompile_headers.html#reusing-precompile-headers)
             - remember that each PCH takes around ~50-200MB and takes some time to compile... reuse is good!
 - you could list the headers which you want precompiled directly in the call to ```target_precompile_headers``` and even set them as ```PUBLIC```/```PRIVATE``` selectively so other targets which link to the current one would also precompile those, but I'm old fashioned and prefer to maintain the PCH for each target on my own.
+
 ### Some random final notes:
 - adding a header which was used only in 30% of the ```.cpp``` files to the precompiled header means all ```.cpp``` files in the taret will have access to it - in time more files might start depending on it without you even noticing - the code might not build without the PCH anymore
     - do you care if it compiles successfully without a PCH?
@@ -50,7 +53,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
 - if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang:
     - those tools might not work because they will try to read the .gch file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579) (along with a patch)
 
-## Unity builds
+# Unity builds
 
 - [detailed blog post about unity builds and why they make builds faster](http://onqtam.com/programming/2018-07-07-unity-builds/)
 - the idea is to cram the ```.cpp``` files of a CMake target into a few ```.cpp``` files which include the original ```.cpp``` files
@@ -121,7 +124,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
                 - call CMake again with unity builds enabled + no generation for that file
     - this will probably get fixed eventually: https://gitlab.kitware.com/cmake/cmake/issues/19826
 
-## Some other good tips to make builds faster
+# Some other good tips to make builds faster
 
 - use ninja instead of GNU make
     - originally developed in Google for building Google Chrome - much better than make
@@ -156,9 +159,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
         - bloaty
         - https://slides.com/onqtam/faster_builds#/45
         - https://slides.com/onqtam/faster_builds#/48
-- caching & distributed builds
-    - https://slides.com/onqtam/faster_builds#/67 
-    - https://slides.com/onqtam/faster_builds#/70   
+- [caching](https://slides.com/onqtam/faster_builds#/67) & [distributed builds](https://slides.com/onqtam/faster_builds#/70)
 - inspecting the physical structure of projects - targets & dependencies
     - https://www.sourcetrail.com/
     - "cmake --graphviz=<file>"
@@ -171,7 +172,7 @@ I recently consulted a company on this exact matter - luckily CMake 3.16 was jus
     - more cores, more RAM...
     - use RAM disks (filesystem in your RAM) for builds - every OS supports those. Put the compiler and the temp & output directories there.
 
-## Final thoughts
+# Final thoughts
 
 If it was up to me most of the techniques listed here would be put to use - from top to bottom - they are sorted based on impact and cost to implement. Slow builds don't just waste time - they also break the 'flow' (context switching) and discourage refactoring and experimentation - how do you put a price on that?
 
