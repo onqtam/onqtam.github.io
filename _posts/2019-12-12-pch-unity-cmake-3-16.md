@@ -2,7 +2,7 @@
 title:  "CMake 3.16 added support for precompiled headers & unity builds - what you need to know"
 date:   2019-12-12 16:40:34 +0200
 header:
-  overlay_image:  "/assets/images/warp_speed.png"
+  overlay_image:  "/assets/images/cmake.png"
 categories: programming
 tags: [programming, C++, compile times, build systems, cmake]
 excerpt: "A weird tree-like guide to applying the techniques"
