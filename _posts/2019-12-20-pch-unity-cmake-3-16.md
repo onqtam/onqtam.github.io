@@ -141,3 +141,5 @@ If you use ```-DCMAKE_EXPORT_COMPILE_COMMANDS=ON``` you get a file called ```com
 If it was up to me most of the techniques listed here would be put to use - from top to bottom - they are sorted based on impact and cost to implement. Slow builds don't just waste time - they also break the 'flow' (context switching) and discourage refactoring and experimentation - how do you put a price on that?
 
 Based on my [```The Hitchhiker's Guide to Faster Builds```](https://www.youtube.com/watch?v=anbOy47fBYI) talk ([slides](https://slides.com/onqtam/faster_builds)).
+
+You can checkout the reddit discussion for this article [here](https://www.reddit.com/r/cpp/comments/edaj7s/cmake_316_added_support_for_precompiled_headers/).
