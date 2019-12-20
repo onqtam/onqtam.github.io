@@ -12,7 +12,7 @@ Modules are coming in C++20 but it will take a while before they are widely adop
 
 ![](/assets/images/compiling.png)
 
-I recently consulted a company on this exact matter - luckily [CMake 3.16 was just released](https://cmake.org/download/) and there was no need to resort to [3rd party CMake scripts](https://github.com/sakra/cotire) from GitHub for precompiled headers and unity builds. Here is what I told them:
+I recently consulted a company on this exact matter - luckily [CMake 3.16 was just released](https://cmake.org/download/) and there was no need to resort to [3rd party CMake scripts](https://github.com/sakra/cotire) from GitHub for precompiled headers and unity builds (thanks to [Cristian Adam](https://twitter.com/cristianadam) for the hard work - [MR 1](https://gitlab.kitware.com/cmake/cmake/merge_requests/3553), [MR 2](https://gitlab.kitware.com/cmake/cmake/merge_requests/3611)!!!). Here is what I told them:
 
 # Precompiled headers (PCH)
 
