@@ -10,6 +10,8 @@ excerpt: "A complete guide to applying the techniques + a few other tips"
 
 Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do **right now**?
 
+![](/assets/images/compiling.png)
+
 I recently consulted a company on this exact matter - luckily [CMake 3.16 was just released](https://cmake.org/download/) and there was no need to resort to [3rd party CMake scripts](https://github.com/sakra/cotire) from GitHub for precompiled headers and unity builds. Here is what I told them:
 
 # Precompiled headers (PCH)
@@ -43,7 +45,7 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
 ### Some problems
 - adding a header which was used only in 30% of the ```.cpp``` files to the precompiled header means that all ```.cpp``` files in the target will now have access to it - in time more files might start depending on it without you even noticing - the code might not build without the PCH anymore
     - do you care if it compiles successfully without a PCH? If so, make every ```.cpp``` explicitly include the precompiled header. This would be problematic if the same ```.cpp``` file is used in 2 or more CMake targets with different PCHs but in that case you should probably move that ```.cpp``` into a static lib, compile it only once and link against that!
-- if you are using GCC but are using ```ccls```/```cquery```/```clangd```/```rtags``` or anything based on clang as a language server - those tools might not work because they will try to read the ```.gch``` file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579)
+- if you are using GCC but are using ```ccls```/```cquery```/```clangd```/```rtags``` or (based on clang) as a language server - those tools might not work because they will try to read the ```.gch``` file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579)
 
 # Unity builds
 
@@ -69,7 +71,7 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
 - if for some reason 2 ```.cpp``` files are hard to compile together they can be separated in different batches by reordering the sources
     - or use [```SKIP_UNITY_BUILD_INCLUSION```](https://cmake.org/cmake/help/latest/prop_sf/SKIP_UNITY_BUILD_INCLUSION.html) to exclude one
 - about 10-20 ```.cpp``` files per unity is the most optimal
-    - this is controlled through the [```UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_BATCH_SIZE.html) target property - default is 8 (can be set globally with [```CMAKE_UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD_BATCH_SIZE.html())
+    - this is controlled through the [```UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_BATCH_SIZE.html) target property - default is 8 (can be set globally with [```CMAKE_UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD_BATCH_SIZE.html))
     - don't worry if a target has few ```.cpp``` files - if it has more than 1 it would benefit from a unity build, + decent build systems like ninja will schedule ```.obj``` files from different targets to be built in parallel
 - the unity ```.cpp``` files will go in the build directory - you don't have to maintain them or add them to version control
 
@@ -130,7 +132,7 @@ If you use ```-DCMAKE_EXPORT_COMPILE_COMMANDS=ON``` you get a file called ```com
 - inspecting the physical structure of projects - targets & dependencies
     - [Graphviz](http://www.graphviz.org/) ([in CMake](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)) - ```cmake --graphviz=<file>```
     - [sourcetrail](https://www.sourcetrail.com/), or [other](https://slides.com/onqtam/faster_builds#/75) [tools](https://slides.com/onqtam/faster_builds#/22)
-- PIMPL ([1](https://slides.com/onqtam/faster_builds#/27), [2](https://slides.com/onqtam/faster_builds#/28)), [disabling inlining for some functions](https://slides.com/onqtam/faster_builds#/38), rewriting templates... - too much effort - do this as a last resort
+- PIMPL ([1](https://slides.com/onqtam/faster_builds#/27), [2](https://slides.com/onqtam/faster_builds#/28)), [disabling inlining for some functions](https://slides.com/onqtam/faster_builds#/38), rewriting templates... too much effort - do this as a last resort
 - on the hardware side - more cores, more RAM... Duuh :D
     - use RAM disks (filesystem in your RAM) - every OS supports those. Put the compiler and the temp & output directories there
 
