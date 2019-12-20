@@ -15,9 +15,7 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
 # Precompiled headers (PCH)
 
 ### The idea is to *precompile* a bunch of common header files
-- *precompile* means that the compiler will parse the C++ headers and save its intermediate representation (IR) into a file
-    - then when compiling sources that IR will be prepended to them - as if the headers were included
-        - the PCH is the first thing each translation unit sees
+- to *precompile* means that the compiler will parse the C++ headers and save its intermediate representation (IR) into a file, and then when compiling the ```.cpp``` files of the target that IR will be prepended to them - as if the headers were included - the contents of the PCH are the first thing each translation unit sees
 - easy to integrate - doesn't require any C++ code changes
 - ~20-30% speedup on UNIX (can be up to 50%+ with MSVC)
 - for targets with at least 10 ```.cpp``` files (takes space & time to compile)
@@ -39,52 +37,47 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
 - the PCH will be included automatically in every ```.cpp``` file
     - adding a PCH to a target doesn't require that you remove the headers in it from all ```.cpp``` files - the C preprocessor is fast
 - easiest if a single header includes the common ones - [example](https://github.com/onqtam/game/blob/master/src/precompiled.h)
-    - you could have per-project precompiled header files or you could [reuse a PCH from one CMake target in another](https://cmake.org/cmake/help/latest/command/target_precompile_headers.html#reusing-precompile-headers) - remember that each PCH takes around ~50-200MB and takes some time to compile... reuse is good!
+    - you could have per-project precompiled header files or you could [reuse a PCH from one CMake target in another](https://cmake.org/cmake/help/latest/command/target_precompile_headers.html#reusing-precompile-headers) - remember that each PCH takes around ~50-200MB and takes some time to compile...
 - you could list the headers which you want precompiled directly in the call to ```target_precompile_headers``` and even set them as ```PUBLIC```/```PRIVATE``` selectively so other targets which link to the current one would also precompile those, but I'm old fashioned and prefer to maintain the PCH for each target on my own.
 
 ### Some random final notes:
 - adding a header which was used only in 30% of the ```.cpp``` files to the precompiled header means that all ```.cpp``` files in the target will now have access to it - in time more files might start depending on it without you even noticing - the code might not build without the PCH anymore
     - do you care if it compiles successfully without a PCH? If so, make every ```.cpp``` explicitly include the precompiled header. This would be problematic if the same ```.cpp``` file is used in 2 or more CMake targets with different PCHs but in that case you should probably move that ```.cpp``` into a static lib, compile it only once and link against that!
-- if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang - those tools might not work because they will try to read the ```.gch``` file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579) (along with a patch)
+- if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang - those tools might not work because they will try to read the ```.gch``` file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579)
 
 # Unity builds
 
-[A detailed blog post about unity builds and why they make builds faster](http://onqtam.com/programming/2018-07-07-unity-builds/)
-
 ### The idea is to cram the ```.cpp``` files of a CMake target into a few ```.cpp``` files which include the original ```.cpp``` files
 - up to 7-8 times faster builds (usually x3 or x4)
-- example: a project of 200 ```.cpp``` files might be divided into 16 unity ```.cpp``` files each including about 13 of the original ```.cpp``` files => 16 ```.cpp``` files to build in parallel and 16 ```.obj``` files to link
+- example: a project of 200 ```.cpp``` files might be divided into 16 unity ```.cpp``` (or ```.cxx``` - whatever) files each including about 13 of the original ```.cpp``` files => 16 ```.cpp``` files to build in parallel and 16 ```.obj``` files to link
 - the reasons for the speedup are:
-    - common headers from the different ```.cpp``` files end up being included and parsed fewer times (this is beneficial even when using precompiled headers)
+    - common headers from the different ```.cpp``` files end up being included and parsed fewer times (this is beneficial even when using PCHs!)
     - common template instantiations with the same types in separate ```.cpp``` files (```vector<int>```) end up being done in fewer places
-    - the linker has to stitch much fewer ```.obj``` files in the end - there are a lot less *weak* symbols to remove (*inline*/template functions from headers end up in every ```.obj``` => linkers remove all duplicates and leave just 1)
-        - surprisingly incremental builds (changing a single ```.cpp```) will probably also be faster (even though you compile more ```.cpp``` files together) instead of slower - precisely because of the reduced number of *weak* duplicated symbols!
+    - the linker has to stitch much fewer ```.obj``` files in the end - there are a lot less *weak* symbols to deduplicate (```inline```/template functions from headers end up in every ```.obj``` => linkers leave just 1)
+        - surprisingly incremental builds (changing a single ```.cpp```) will probably also be faster instead of slower (even though you compile more ```.cpp``` files together) - precisely because of the reduced number of *weak* duplicated symbols!
     - less compiler invocations and less ```.obj``` files are written to disk
-- [uncovers ODR violations](https://stackoverflow.com/questions/31722473)
-- runtime (final binary) might be faster (free LTO!) - because the compiler sees more symbols from different ```.cpp``` files together
+- the most reliable way to detect [ODR violations](https://stackoverflow.com/questions/31722473)
+- runtime (final binary) might even be faster! (free [LTO](https://en.wikipedia.org/wiki/Interprocedural_optimization)) - because the compiler sees more symbols from different ```.cpp``` files together
+- [A detailed blog post about unity builds and why they make builds faster](http://onqtam.com/programming/2018-07-07-unity-builds/)
 
 ### How to use
-- CMake 3.16 adds the ```UNITY_BUILD``` target property
-    - make sure to read this page: https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html
+- CMake 3.16 adds the [```UNITY_BUILD```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) target property
     - you can set this property per target explicitly
-        - set_target_properties(<target> PROPERTIES UNITY_BUILD ON)
-        - or set it globally: ```set(CMAKE_UNITY_BUILD ON)``` (or call CMake with ```-DCMAKE_UNITY_BUILD=ON```)
-            - and then you can explicitly disable it for just a few targets by setting their property
-- the order in which the ```.cpp``` files go into the batches depends on the order they were given to a target in add_library/add_executable
-- if for some reason 2 ```.cpp``` files are hard to compile together they can be separated in different batches
-    - or one of them can be excluded by setting the SKIP_UNITY_BUILD_INCLUSION property on it
-        - https://cmake.org/cmake/help/latest/prop_sf/SKIP_UNITY_BUILD_INCLUSION.html
+        - ```set_target_properties(<target> PROPERTIES UNITY_BUILD ON)```
+    - or set it globally: ```set(CMAKE_UNITY_BUILD ON)``` (or call CMake with ```-DCMAKE_UNITY_BUILD=ON```) and then you can explicitly disable it for some targets by setting their property
+- the order in which the ```.cpp``` files go into the batches depends on the order they were given to a target in ```add_library```/```add_executable```
+- if for some reason 2 ```.cpp``` files are hard to compile together they can be separated in different batches by reordering the sources
+    - or one of them can be excluded by setting the [```SKIP_UNITY_BUILD_INCLUSION```](https://cmake.org/cmake/help/latest/prop_sf/SKIP_UNITY_BUILD_INCLUSION.html)
 - about 10-20 ```.cpp``` files per unity is the most optimal
-    - this is controlled through the [```UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_BATCH_SIZE.html) target property - default is 8 (can be set globally with [```CMAKE_UNITY_BUILD_BATCH_SIZE```]https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD_BATCH_SIZE.html())
-    - don't worry if a target has few ```.cpp``` files - if it has >1 ```.cpp``` file it would benefit from a unity build
-        - also a good build system such as ninja will schedule ```.obj``` files from different targets to be compiled in parallel
-- the unity ```.cxx``` files will go in the build directory - you don't have to maintain them or add them to source control
+    - this is controlled through the [```UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_BATCH_SIZE.html) target property - default is 8 (can be set globally with [```CMAKE_UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD_BATCH_SIZE.html())
+    - don't worry if a target has few ```.cpp``` files - if it has more than 1 ```.cpp``` file it would benefit from a unity build, + any decent build system such as ninja will schedule ```.obj``` files from different targets to be compiled in parallel
+- the unity ```.cpp``` files will go in the build directory - you don't have to maintain them or add them to source control
 
 ### Initial problems when trying to compile a project as unity
 - some headers will be missing include guards or ```#pragma once```
-- there will be static globals (or in anonymous namespaces) in different ```.cpp``` files with identical names - those would clash
-    - either rename them or put such globals into an additional namespace - perhaps with the name of the file: GRAPH_VISITOR_CPP
-        - putting static symbols inside of a named namespace keeps their linkage to *internal* (same with nesting anonymous namespaces into named ones)
+- there will be static globals (or in anonymous namespaces) in different ```.cpp``` files with identical names which would clash
+    - either rename them or put such globals into an additional namespace - perhaps with the name of the file: for ```GraphVisitor.cpp``` I would recommend ```GRAPH_VISITOR_CPP```
+        - putting static symbols inside of a named namespace in a ```.cpp``` keeps their linkage to *internal* (same with nesting anonymous namespaces into named ones)
 - there will be symbol ambiguities
     - mostly because some ```.cpp``` file uses a namespace, and then some other ```.cpp``` file which ends up in the same unity ```.cpp``` cannot compile
     - either remove the ```using namespace ...``` stuff or fully qualify symbols where necessary (can use ```::``` to mean *from global scope*)
@@ -101,18 +94,18 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
     - there was plenty of 10+ year old code
 
 ### Recommended way to go about it
-    - I would recommend trying targets 1 by 1 by setting their target property UNITY_BUILD to ON - and not to enable it globally directly
-    - start with low batching - get the project to compile with 4 ```.cpp``` files per unity, then increase
-    - if you desire to have 20 ```.cpp``` files per batch in the end - go to atleast 40-50, clean the errors and then move back to 20
-        - ==> future problems will be less likely - when a new ```.cpp``` file is added somewhere and changes which ```.cpp``` files get paired together
-    - unity builds should eventually become the default mode for building for all developers
-        - there should be a separate CI build that checks that the project still compiles not as unity - checks for missing includes.
+- I would recommend trying targets 1 by 1 by setting their target property UNITY_BUILD to ON - and not to enable it globally directly
+- start with low batching - get the project to compile with 4 ```.cpp``` files per unity, then increase
+- if you desire to have 20 ```.cpp``` files per batch in the end - go to atleast 40-50, clean the errors and then move back to 20
+    - ==> future problems will be less likely - when a new ```.cpp``` file is added somewhere and changes which ```.cpp``` files get paired together
+- unity builds should eventually become the default mode for building for all developers
+    - there should be a separate CI build that checks that the project still compiles not as unity - checks for missing includes.
 
 ### Some random final notes:
 - if you are using CMAKE_EXPORT_COMPILE_COMMANDS=ON you get a file called ```compile_commands.json``` generated by CMake in the build folder
     - that file contains compile commands for each translation unit - with all definitions and includes
     - that file is used by tools such as ccls/cquery/clangd - language servers which are usually integrated with editors and IDEs such as vim/emacs/VSCode for intellisense (code completion, refactoring and syntax highlighting)
-        - when using unity builds the build information there will not contain compile commands for the specific ```.cpp``` files but only for the actual unity ```.cxx``` files - tools such as ccls and cquery might stop working correctly
+        - when using unity builds the build information there will not contain compile commands for the specific ```.cpp``` files but only for the actual unity ```.cpp``` files - tools such as ccls and cquery might stop working correctly
             - in my current company we have a script which calls cmake - this is what we do:
                 - call CMake once with disabled unity builds + to generate the compile_commands.json file
                 - call CMake again with unity builds enabled + no generation for that file
