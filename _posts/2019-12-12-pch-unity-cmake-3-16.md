@@ -8,9 +8,9 @@ tags: [programming, C++, compile times, build systems, cmake]
 excerpt: "A complete guide to applying the techniques + a few other tips"
 ---
 
-Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do right now to speed up our builds?
+Modules are coming in C++20 but it will take a while before they are widely adopted, optimized and supported by tooling - what can we do **right now**?
 
-I recently consulted a company on this exact matter - luckily [CMake 3.16 was just released](https://cmake.org/download/) and there was no need to resort to 3rd party CMake scripts from GitHub for precompiled headers and unity builds (such as [cotire](https://github.com/sakra/cotire)). Here is what I told them:
+I recently consulted a company on this exact matter - luckily [CMake 3.16 was just released](https://cmake.org/download/) and there was no need to resort to [3rd party CMake scripts](https://github.com/sakra/cotire) from GitHub for precompiled headers and unity builds. Here is what I told them:
 
 # Precompiled headers (PCH)
 
@@ -40,7 +40,7 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
     - you could have per-project precompiled header files or you could [reuse a PCH from one CMake target in another](https://cmake.org/cmake/help/latest/command/target_precompile_headers.html#reusing-precompile-headers) - remember that each PCH takes around ~50-200MB and takes some time to compile...
 - you could list the headers which you want precompiled directly in the call to ```target_precompile_headers``` and even set them as ```PUBLIC```/```PRIVATE``` selectively so other targets which link to the current one would also precompile those, but I'm old fashioned and prefer to maintain the PCH for each target on my own.
 
-### Some random final notes:
+### Some final notes:
 - adding a header which was used only in 30% of the ```.cpp``` files to the precompiled header means that all ```.cpp``` files in the target will now have access to it - in time more files might start depending on it without you even noticing - the code might not build without the PCH anymore
     - do you care if it compiles successfully without a PCH? If so, make every ```.cpp``` explicitly include the precompiled header. This would be problematic if the same ```.cpp``` file is used in 2 or more CMake targets with different PCHs but in that case you should probably move that ```.cpp``` into a static lib, compile it only once and link against that!
 - if you are using GCC but are using ccls/clangd or anything else as a language server which is based on clang - those tools might not work because they will try to read the ```.gch``` file produced by GCC - [bug report](https://bugs.llvm.org/show_bug.cgi?id=41579)
@@ -64,52 +64,46 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
 - CMake 3.16 adds the [```UNITY_BUILD```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) target property
     - you can set this property per target explicitly
         - ```set_target_properties(<target> PROPERTIES UNITY_BUILD ON)```
-    - or set it globally: ```set(CMAKE_UNITY_BUILD ON)``` (or call CMake with ```-DCMAKE_UNITY_BUILD=ON```) and then you can explicitly disable it for some targets by setting their property
+    - or set it globally: ```set(CMAKE_UNITY_BUILD ON)``` (or call CMake with ```-DCMAKE_UNITY_BUILD=ON```) and then you can explicitly disable it for some targets by setting their property to ```OFF```
 - the order in which the ```.cpp``` files go into the batches depends on the order they were given to a target in ```add_library```/```add_executable```
 - if for some reason 2 ```.cpp``` files are hard to compile together they can be separated in different batches by reordering the sources
-    - or one of them can be excluded by setting the [```SKIP_UNITY_BUILD_INCLUSION```](https://cmake.org/cmake/help/latest/prop_sf/SKIP_UNITY_BUILD_INCLUSION.html)
+    - or use [```SKIP_UNITY_BUILD_INCLUSION```](https://cmake.org/cmake/help/latest/prop_sf/SKIP_UNITY_BUILD_INCLUSION.html) to exclude one
 - about 10-20 ```.cpp``` files per unity is the most optimal
     - this is controlled through the [```UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_BATCH_SIZE.html) target property - default is 8 (can be set globally with [```CMAKE_UNITY_BUILD_BATCH_SIZE```](https://cmake.org/cmake/help/latest/variable/CMAKE_UNITY_BUILD_BATCH_SIZE.html())
-    - don't worry if a target has few ```.cpp``` files - if it has more than 1 ```.cpp``` file it would benefit from a unity build, + any decent build system such as ninja will schedule ```.obj``` files from different targets to be compiled in parallel
-- the unity ```.cpp``` files will go in the build directory - you don't have to maintain them or add them to source control
+    - don't worry if a target has few ```.cpp``` files - if it has more than 1 it would benefit from a unity build, + any decent build system such as ninja will schedule ```.obj``` files from different targets to be compiled in parallel
+- the unity ```.cpp``` files will go in the build directory - you don't have to maintain them or add them to version control
 
 ### Initial problems when trying to compile a project as unity
 - some headers will be missing include guards or ```#pragma once```
 - there will be static globals (or in anonymous namespaces) in different ```.cpp``` files with identical names which would clash
-    - either rename them or put such globals into an additional namespace - perhaps with the name of the file: for ```GraphVisitor.cpp``` I would recommend ```GRAPH_VISITOR_CPP```
-        - putting static symbols inside of a named namespace in a ```.cpp``` keeps their linkage to *internal* (same with nesting anonymous namespaces into named ones)
+    - either rename them or put such globals into an additional namespace - perhaps with the name of the file: for ```GraphVisitor.cpp``` I would recommend ```GRAPH_VISITOR_CPP``` (putting static symbols inside of a named namespace in a ```.cpp``` keeps their linkage to *internal* , and the same is true with nesting anonymous namespaces into named ones)
 - there will be symbol ambiguities
     - mostly because some ```.cpp``` file uses a namespace, and then some other ```.cpp``` file which ends up in the same unity ```.cpp``` cannot compile
     - either remove the ```using namespace ...``` stuff or fully qualify symbols where necessary (can use ```::``` to mean *from global scope*)
-- some macros might have to be explicitly #undef-ed at the end of the ```.cpp``` files where they are defined/used
-    - or rewritten to C++ constructs - macros are $h1t anyway
-- another more obscure possible problem:
-    - if a static library gets built as a unity build - there are fewer ```.obj``` files stitched together
-        - if some other target links to the static library and uses only some symbols - from a few of the original ```.obj``` files
-            - it might no longer link because now there are other symbols in the same ```.obj``` file where the needed symbols reside
-                - those other symbols might need some other symbols which are in some other static library
-                - solution: find what else needs to be linked against - because of this newly dragged dependency
+- some macros might have to be explicitly ```#undef```-ined at the end of the ```.cpp``` files where they are defined/used
+    - or rewritten to C++ constructs - macros are **$h1t** anyway
+    - or take a look at [```UNITY_BUILD_CODE_BEFORE_INCLUDE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE.html) and [```UNITY_BUILD_CODE_AFTER_INCLUDE```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE.html)
+- another more obscure possible problem: if a static library gets built as a unity build => there are fewer ```.obj``` files stitched together, and if some other target links to the static library and uses only some symbols - from a few of the original ```.obj``` files, it might no longer link because now there are other symbols in the same ```.obj``` file where the needed symbols reside, and those other symbols might need some other symbols which are in some other static library
+    - solution: find what else needs to be linked against - because of this newly dragged link dependency
 - unity build failures are rare after the initial cleanup (and if everyone uses unity builds locally there wouldn't be any)
-- it took me about 3-4 full days to compile about 2000 ```.cpp``` files in 20 different CMake targets to unity in my current company
-    - there was plenty of 10+ year old code
+- it took me about ~2 full days to compile about 2000 ```.cpp``` files in 20+ different CMake targets as unity in my current company ([NuoDB](https://www.nuodb.com/)])
 
 ### Recommended way to go about it
-- I would recommend trying targets 1 by 1 by setting their target property UNITY_BUILD to ON - and not to enable it globally directly
-- start with low batching - get the project to compile with 4 ```.cpp``` files per unity, then increase
-- if you desire to have 20 ```.cpp``` files per batch in the end - go to atleast 40-50, clean the errors and then move back to 20
-    - ==> future problems will be less likely - when a new ```.cpp``` file is added somewhere and changes which ```.cpp``` files get paired together
-- unity builds should eventually become the default mode for building for all developers
-    - there should be a separate CI build that checks that the project still compiles not as unity - checks for missing includes.
+- I would recommend trying targets 1 by 1 by setting their target property ```UNITY_BUILD``` to ON - and not to enable it globally directly
+- start with low batching - first try to get the project to compile with 4 ```.cpp``` files per unity, and then increase
+- if you desire to have 20 ```.cpp``` files per batch in the end - go to atleast 40 or 50, clean the errors and then move back to 20
+    - => future problems will be less likely - when a new ```.cpp``` file is added somewhere it changes which ```.cpp``` files get paired together
+- unity builds should eventually become the default mode for building
+    - there should be a separate CI build that checks that the project still compiles not as unity - checking for missing includes.
 
-### Some random final notes:
-- if you are using CMAKE_EXPORT_COMPILE_COMMANDS=ON you get a file called ```compile_commands.json``` generated by CMake in the build folder
-    - that file contains compile commands for each translation unit - with all definitions and includes
-    - that file is used by tools such as ccls/cquery/clangd - language servers which are usually integrated with editors and IDEs such as vim/emacs/VSCode for intellisense (code completion, refactoring and syntax highlighting)
-        - when using unity builds the build information there will not contain compile commands for the specific ```.cpp``` files but only for the actual unity ```.cpp``` files - tools such as ccls and cquery might stop working correctly
-            - in my current company we have a script which calls cmake - this is what we do:
-                - call CMake once with disabled unity builds + to generate the compile_commands.json file
-                - call CMake again with unity builds enabled + no generation for that file
-    - this will probably get fixed eventually: https://gitlab.kitware.com/cmake/cmake/issues/19826
+### Some final notes:
+- if you use ```-DCMAKE_EXPORT_COMPILE_COMMANDS=ON``` you get a file called ```compile_commands.json``` generated by CMake in the build folder
+    - that file contains compile commands for each translation unit - with all definitions and includes necessary for parsing the C++
+    - that file is used by tools such as ```ccls```/```cquery```/```clangd```/```rtags``` - language servers which are usually integrated with editors and IDEs such as ```vim```/```emacs```/```VSCode``` for intellisense (code completion, refactoring and syntax highlighting)
+    - when using unity builds the build information there will not contain compile commands for the specific ```.cpp``` files but only for the actual unity ```.cpp``` files - these tools might stop working correctly ([bug report](https://gitlab.kitware.com/cmake/cmake/issues/19826)). In my current company we have a script which calls CMake and this is what it does:
+        - calls CMake once with disabled unity builds + generation of the ```compile_commands.json``` file
+        - calls CMake again with unity builds enabled + no generation for that file
+        - => the only downside of this is that if later we invoke our build system directly and it detects changes in CMake and reconfigures/regenerates the build files, it will be done with unity enabled & the generation of ```compile_commands.json``` disabled
 
 # Some other good tips to make builds faster
 
