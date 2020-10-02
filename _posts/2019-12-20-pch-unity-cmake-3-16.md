@@ -143,3 +143,5 @@ If it was up to me most of the techniques listed here would be put to use - from
 Based on my [```The Hitchhiker's Guide to Faster Builds```](https://www.youtube.com/watch?v=anbOy47fBYI) talk ([slides](https://slides.com/onqtam/faster_builds)).
 
 You can checkout the reddit discussion for this article [here](https://www.reddit.com/r/cpp/comments/edaj7s/cmake_316_added_support_for_precompiled_headers/).
+
+I'm available for hire to fix your C++ build times - you can expect something along the lines of whatever is in this blog post.
