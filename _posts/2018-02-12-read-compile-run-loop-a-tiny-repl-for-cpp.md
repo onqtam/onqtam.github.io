@@ -217,7 +217,7 @@ Some ideas about the integration of the [RCRL](https://github.com/onqtam/rcrl) e
 
 - I'm betting that an awesome C++ game engine that enables an incredibly fast and flexible workflow can be developed without the need for scripting if 3 things are in place:
     - something like [dynamix](https://github.com/iboB/dynamix) is used for the object model which would allow for very flexible and elegant implementation of the business logic - one of the 2 main reasons people turn to scripting languages
-    - hot-reloading of any module (including whole subsystems like *rendering* and *physics*) and the ability to change the layout of types (like adding a new field in a class) at runtime is possible - perhaps with the help of a [practical generic reflection system](http://onqtam.com/programming/2017-09-02-simple-cpp-reflection-with-cmake/) - this is the second main reason people turn to scripting languages for parts of the business logic - reloadability
+    - hot-reloading of any module (including whole subsystems like *rendering* and *physics*) and the ability to change the layout of types (like adding a new field in a class) at runtime is possible - perhaps with the help of a [practical generic reflection system](https://onqtam.github.io/programming/2017-09-02-simple-cpp-reflection-with-cmake/) - this is the second main reason people turn to scripting languages for parts of the business logic - reloadability
     - something like a REPL for convenience ([RCRL](https://github.com/onqtam/rcrl) fills this gap)
     
     What we lose by eliminating scripting is:
