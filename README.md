@@ -1,4 +1,4 @@
-personal site - http://onqtam.com
+personal site - https://onqtam.github.io/
 
 ### Future posts:
 
