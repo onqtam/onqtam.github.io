@@ -60,7 +60,7 @@ I recently consulted a company on this exact matter - luckily [CMake 3.16 was ju
     - less compiler invocations and less ```.obj``` files are written to disk
 - the most reliable way to detect [ODR violations](https://stackoverflow.com/questions/31722473)
 - runtime (final binary) might even be faster! (free [LTO](https://en.wikipedia.org/wiki/Interprocedural_optimization)) - because the compiler sees more symbols from different ```.cpp``` files together
-- [A detailed blog post about unity builds and why they make builds faster](http://onqtam.com/programming/2018-07-07-unity-builds/)
+- [A detailed blog post about unity builds and why they make builds faster](https://onqtam.github.io/programming/2018-07-07-unity-builds/)
 
 ### How to use
 - CMake 3.16 adds the [```UNITY_BUILD```](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) target property
