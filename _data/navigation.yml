@@ -1,0 +1,8 @@
+# main links
+main:
+  - title: "About"
+    url: /about
+  - title: "Sitemap"
+    url: /sitemap
+  - title: "Archive by year"
+    url: /year-archive

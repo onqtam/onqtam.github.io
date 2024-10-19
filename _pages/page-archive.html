@@ -1,0 +1,10 @@
+---
+layout: archive
+permalink: /page-archive/
+title: "Page Archive"
+---
+
+{% include base_path %}
+{% for post in site.pages %}
+  {% include archive-single.html %}
+{% endfor %}
